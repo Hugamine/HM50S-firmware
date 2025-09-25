@@ -12,8 +12,6 @@
 #if LV_WAYLAND_WINDOW_DECORATIONS
 
 #include "lv_wayland_private.h"
-#include <errno.h>
-#include <unistd.h>
 
 /*********************
  *      DEFINES
@@ -60,14 +58,9 @@ static void color_fill_RGB565(void * pixels, lv_color_t color, uint32_t width, u
  **********************/
 
 bool lv_wayland_window_decoration_attach(struct window * window, struct graphic_object * decoration,
-                                         void * decoration_buffer, struct graphic_object * parent)
+                                         smm_buffer_t * decoration_buffer, struct graphic_object * parent)
 {
-#if LV_WAYLAND_USE_DMABUF
-    struct wl_buffer * wl_buf = ((struct buffer *)decoration_buffer)->buffer;
-#else
-    struct wl_buffer * wl_buf = SMM_BUFFER_PROPERTIES((smm_buffer_t *)decoration_buffer)->tag[TAG_LOCAL];
-#endif
-
+    struct wl_buffer * wl_buf = SMM_BUFFER_PROPERTIES(decoration_buffer)->tag[TAG_LOCAL];
 
     int pos_x, pos_y;
 
@@ -172,11 +165,7 @@ void lv_wayland_window_decoration_detach_all(struct window * window)
 bool lv_wayland_window_decoration_create(struct window * window, struct graphic_object * decoration, int window_width,
                                          int window_height)
 {
-#if LV_WAYLAND_USE_DMABUF
-    struct buffer * buf;
-#else
     smm_buffer_t * buf;
-#endif
     void * buf_base;
     int x, y;
     lv_color_t * pixel;
@@ -221,17 +210,7 @@ bool lv_wayland_window_decoration_create(struct window * window, struct graphic_
             LV_ASSERT_MSG(0, "Invalid object type");
             return false;
     }
-#if LV_WAYLAND_USE_DMABUF
-    bpp = lv_color_format_get_size(LV_COLOR_FORMAT_NATIVE);
-    buf = dmabuf_acquire_pool_buffer(window, decoration);
-    buf_base = mmap(0, (decoration->width * bpp) * decoration->height, PROT_READ | PROT_WRITE, MAP_SHARED,
-                    buf->dmabuf_fds[0], 0);
-    if(buf_base == MAP_FAILED) {
-        destroy_decorators_buf(window, decoration);
-        LV_LOG_ERROR("cannot map in allocated decoration buffer %d (%s)", errno, strerror(errno));
-        return false;
-    }
-#else
+
     bpp = lv_color_format_get_size(LV_COLOR_FORMAT_NATIVE);
 
     LV_LOG_TRACE("decoration window %dx%d", decoration->width, decoration->height);
@@ -251,7 +230,7 @@ bool lv_wayland_window_decoration_create(struct window * window, struct graphic_
         smm_release(buf);
         return false;
     }
-#endif
+
     switch(decoration->type) {
         case OBJECT_TITLEBAR:
             color_fill(buf_base, lv_color_make(0x66, 0x66, 0x66), decoration->width, decoration->height);
@@ -318,13 +297,7 @@ bool lv_wayland_window_decoration_create(struct window * window, struct graphic_
             return false;
     }
 
-    bool ret = lv_wayland_window_decoration_attach(window, decoration, buf, window->body);
-
-#if LV_WAYLAND_USE_DMABUF
-    munmap(buf_base, (decoration->width * bpp) * decoration->height);
-#endif
-
-    return ret;
+    return lv_wayland_window_decoration_attach(window, decoration, buf, window->body);
 }
 
 void lv_wayland_window_decoration_detach(struct window * window, struct graphic_object * decoration)

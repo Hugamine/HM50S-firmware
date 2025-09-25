@@ -1,5 +1,5 @@
 /**
- * @file lv_gif.c
+ * @file lv_gifenc.c
  *
  */
 

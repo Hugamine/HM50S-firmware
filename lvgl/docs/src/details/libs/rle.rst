@@ -101,4 +101,4 @@ the output to ``./output/cogwheel.bin``.
 API
 ***
 
-:ref:`libs/rle/lv_rle.h`
+:ref:`lv_rle_h`

@@ -59,7 +59,7 @@ descriptor are very useful to identify the Draw Task.  For example:
                        Required when a new Draw Tasks are also created */
 
 
-Simple Initialization
+Simple Initilialzation
 ----------------------
 
 Before using a draw descriptor it needs to be initialized with
@@ -83,7 +83,7 @@ For example:
     lv_draw_label(lv_event_get_layer(e), &my_label_draw_dsc, &a);
 
 
-Initialization for Widgets
+Initilialzation for Widgets
 ---------------------------
 
 When rendering a part of a Widget, helper functions can initialize draw
@@ -273,7 +273,7 @@ descriptor.
 Linear Gradients
 ----------------
 
-The linear (or skew) gradient are similar to horizontal or vertical gradient but the
+The liniear (or skew) gradinet are similar to horizontal or vertical gradient but the
 angle of the gradient can be controlled.
 
 The linear gradient will be rendered along a line defined by 2 points.
@@ -606,7 +606,6 @@ Triangles are defined by :cpp:type:`lv_draw_triangle_dsc_t`, which includes:
          ``color`` field is ignored. The ``opa`` field adjusts overall opacity.
 
 Functions for triangle drawing:
-
 - :cpp:expr:`lv_draw_triangle_dsc_init(&dsc)` initializes a triangle descriptor.
 - :cpp:expr:`lv_draw_triangle(layer, &dsc)` creates a task to draw a triangle.
 - :cpp:expr:`lv_draw_task_get_triangle_dsc(draw_task)` retrieves triangle descriptor.

@@ -43,10 +43,6 @@ extern "C" {
 #include "render/lv_demo_render.h"
 #endif
 
-#if LV_USE_DEMO_GLTF
-#include "gltf/lv_demo_gltf.h"
-#endif
-
 /*********************
  *      DEFINES
  *********************/
@@ -80,4 +76,4 @@ void lv_demos_show_help(void);
 } /* extern "C" */
 #endif
 
-#endif /*LV_DEMOS_H*/
+#endif /*LV_DEMO_H*/

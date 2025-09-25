@@ -221,8 +221,19 @@ void lv_indev_set_gesture_data(lv_indev_data_t * data, lv_indev_gesture_recogniz
                                lv_indev_gesture_type_t type)
 {
     bool is_active;
+    lv_point_t cur_pnt;
 
     if(recognizer == NULL) return;
+
+    /* If there is a single contact point use its coords,
+     * when there are no contact points it's set to 0,0
+     *
+     * Note: If a gesture was detected, the primary point is overwritten below
+     */
+
+    lv_indev_get_gesture_primary_point(recognizer, &cur_pnt);
+    data->point.x = cur_pnt.x;
+    data->point.y = cur_pnt.y;
 
     data->gesture_type[type] = LV_INDEV_GESTURE_NONE;
     data->gesture_data[type] = NULL;
@@ -240,6 +251,9 @@ void lv_indev_set_gesture_data(lv_indev_data_t * data, lv_indev_gesture_recogniz
 
     switch(recognizer->state) {
         case LV_INDEV_GESTURE_STATE_RECOGNIZED:
+            lv_indev_get_gesture_center_point(recognizer, &cur_pnt);
+            data->point.x = cur_pnt.x;
+            data->point.y = cur_pnt.y;
             data->gesture_type[type] = type;
             data->gesture_data[type] = (void *) recognizer;
             break;
@@ -538,7 +552,7 @@ void lv_indev_gesture_recognizers_update(lv_indev_t * indev, lv_indev_touch_data
                 /* Update all recognizers to let them process input */
                 indev->recognizers[i].recog_fn(&indev->recognizers[i], &touches[0], touch_cnt);
 
-                /* Then reset the recognizers which did not report RECOGNIZED or ENDED */
+                /* Then reset the recognizers which did not repport RECONIZED or ENDED */
                 if(((lv_indev_gesture_type_t)i) != type) {
                     reset_recognizer(&indev->recognizers[i]);
                 }
@@ -596,7 +610,7 @@ void lv_indev_gesture_recognizers_set_data(lv_indev_t * indev, lv_indev_data_t *
  ********************/
 
 /**
- * Calculate the direction from the starting center of a two fingers swipe gesture
+ * Caluclate the direction from the starting center of a two fingers swipe gesture
  * @param recognizer        pointer to the recognizer handling the two fingers
  *                          swipe gesture
  * @return                  the direction of the swipe, from the starting center

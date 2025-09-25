@@ -41,6 +41,28 @@ typedef struct _lv_xml_style_t {
 lv_result_t lv_xml_style_register(lv_xml_component_scope_t * scope, const char ** attrs);
 
 /**
+ * Add the styles to an object. Handles multiple styles and selectors too.
+ * @param state     the parser state
+ * @param obj       the target widget
+ * @param text      the styles' string, e.g. "blue red:pressed:knob"
+ */
+void lv_xml_style_add_to_obj(lv_xml_parser_state_t * state, lv_obj_t * obj, const char * text);
+
+/**
+ * Convert a style state to enum
+ * @param txt       e.g. "pressed"
+ * @return          the enum `LV_STATE_PRESSED`
+ */
+lv_state_t lv_xml_style_state_to_enum(const char * txt);
+
+/**
+ * Convert a style part to enum
+ * @param txt       e.g. "knob"
+ * @return          the enum `LV_PART_KNOB`
+ */
+lv_part_t lv_xml_style_part_to_enum(const char * txt);
+
+/**
  * Decompose a string like `"style1:pressed:checked:knob"` to style name and selector
  * @param txt           the input string
  * @param selector      store the selectors here

@@ -7,7 +7,6 @@ Debugger()
 
 # Dumps
 DumpObj()
-DumpDisplayBuf()
 
 # Infos
 InfoStyle()

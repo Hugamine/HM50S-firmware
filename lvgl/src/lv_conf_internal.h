@@ -25,10 +25,10 @@
 #define LV_STDLIB_RTTHREAD          3
 #define LV_STDLIB_CUSTOM            255
 
-#define LV_DRAW_SW_ASM_NONE             0
-#define LV_DRAW_SW_ASM_NEON             1
-#define LV_DRAW_SW_ASM_HELIUM           2
-#define LV_DRAW_SW_ASM_CUSTOM           255
+#define LV_DRAW_SW_ASM_NONE         0
+#define LV_DRAW_SW_ASM_NEON         1
+#define LV_DRAW_SW_ASM_HELIUM       2
+#define LV_DRAW_SW_ASM_CUSTOM       255
 
 #define LV_NEMA_HAL_CUSTOM          0
 #define LV_NEMA_HAL_STM32           1
@@ -959,24 +959,6 @@
             #define LV_VG_LITE_STROKE_CACHE_CNT 32
         #endif
     #endif
-
-    /** Remove VLC_OP_CLOSE path instruction (Workaround for NXP) **/
-    #ifndef LV_VG_LITE_DISABLE_VLC_OP_CLOSE
-        #ifdef CONFIG_LV_VG_LITE_DISABLE_VLC_OP_CLOSE
-            #define LV_VG_LITE_DISABLE_VLC_OP_CLOSE CONFIG_LV_VG_LITE_DISABLE_VLC_OP_CLOSE
-        #else
-            #define LV_VG_LITE_DISABLE_VLC_OP_CLOSE 0
-        #endif
-    #endif
-
-    /** Disable linear gradient extension for some older versions of drivers. */
-    #ifndef LV_VG_LITE_DISABLE_LINEAR_GRADIENT_EXT
-        #ifdef CONFIG_LV_VG_LITE_DISABLE_LINEAR_GRADIENT_EXT
-            #define LV_VG_LITE_DISABLE_LINEAR_GRADIENT_EXT CONFIG_LV_VG_LITE_DISABLE_LINEAR_GRADIENT_EXT
-        #else
-            #define LV_VG_LITE_DISABLE_LINEAR_GRADIENT_EXT 0
-        #endif
-    #endif
 #endif
 
 /** Accelerate blends, fills, etc. with STM32 DMA2D */
@@ -1015,44 +997,6 @@
         #define LV_USE_DRAW_OPENGLES CONFIG_LV_USE_DRAW_OPENGLES
     #else
         #define LV_USE_DRAW_OPENGLES 0
-    #endif
-#endif
-
-/** Draw using espressif PPA accelerator */
-#ifndef LV_USE_PPA
-    #ifdef CONFIG_LV_USE_PPA
-        #define LV_USE_PPA CONFIG_LV_USE_PPA
-    #else
-        #define LV_USE_PPA  0
-    #endif
-#endif
-#if LV_USE_PPA
-    #ifndef LV_USE_PPA_IMG
-        #ifdef CONFIG_LV_USE_PPA_IMG
-            #define LV_USE_PPA_IMG CONFIG_LV_USE_PPA_IMG
-        #else
-            #define LV_USE_PPA_IMG 0
-        #endif
-    #endif
-#endif
-
-/* Use EVE FT81X GPU. */
-#ifndef LV_USE_DRAW_EVE
-    #ifdef CONFIG_LV_USE_DRAW_EVE
-        #define LV_USE_DRAW_EVE CONFIG_LV_USE_DRAW_EVE
-    #else
-        #define LV_USE_DRAW_EVE 0
-    #endif
-#endif
-
-#if LV_USE_DRAW_EVE
-    /* EVE_GEN value: 2, 3, or 4 */
-    #ifndef LV_DRAW_EVE_EVE_GENERATION
-        #ifdef CONFIG_LV_DRAW_EVE_EVE_GENERATION
-            #define LV_DRAW_EVE_EVE_GENERATION CONFIG_LV_DRAW_EVE_EVE_GENERATION
-        #else
-            #define LV_DRAW_EVE_EVE_GENERATION 4
-        #endif
     #endif
 #endif
 
@@ -1548,15 +1492,6 @@
     #endif
 #endif
 
-/* Enable usage of the LVGL's vg_lite spec driver */
-#ifndef LV_USE_VG_LITE_DRIVER
-    #ifdef CONFIG_LV_USE_VG_LITE_DRIVER
-        #define LV_USE_VG_LITE_DRIVER CONFIG_LV_USE_VG_LITE_DRIVER
-    #else
-        #define LV_USE_VG_LITE_DRIVER  0
-    #endif
-#endif
-
 /* Enable the multi-touch gesture recognition feature */
 /* Gesture recognition requires the use of floats */
 #ifndef LV_USE_GESTURE_RECOGNITION
@@ -1880,6 +1815,20 @@
         #define LV_FONT_DEJAVU_16_PERSIAN_HEBREW    0  /**< Hebrew, Arabic, Persian letters and all their forms */
     #endif
 #endif
+#ifndef LV_FONT_SIMSUN_14_CJK
+    #ifdef CONFIG_LV_FONT_SIMSUN_14_CJK
+        #define LV_FONT_SIMSUN_14_CJK CONFIG_LV_FONT_SIMSUN_14_CJK
+    #else
+        #define LV_FONT_SIMSUN_14_CJK               0  /**< 1000 most common CJK radicals */
+    #endif
+#endif
+#ifndef LV_FONT_SIMSUN_16_CJK
+    #ifdef CONFIG_LV_FONT_SIMSUN_16_CJK
+        #define LV_FONT_SIMSUN_16_CJK CONFIG_LV_FONT_SIMSUN_16_CJK
+    #else
+        #define LV_FONT_SIMSUN_16_CJK               0  /**< 1000 most common CJK radicals */
+    #endif
+#endif
 #ifndef LV_FONT_SOURCE_HAN_SANS_SC_14_CJK
     #ifdef CONFIG_LV_FONT_SOURCE_HAN_SANS_SC_14_CJK
         #define LV_FONT_SOURCE_HAN_SANS_SC_14_CJK CONFIG_LV_FONT_SOURCE_HAN_SANS_SC_14_CJK
@@ -2081,7 +2030,6 @@
  *  - lv_dropdown_t    :  Options set to "Option 1", "Option 2", "Option 3", else no values are set.
  *  - lv_roller_t      :  Options set to "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", else no values are set.
  *  - lv_label_t       :  Text set to "Text", else empty string.
- *  - lv_arclabel_t   :  Text set to "Arced Text", else empty string.
  * */
 #ifndef LV_WIDGETS_HAS_DEFAULT_VALUE
     #ifdef LV_KCONFIG_PRESENT
@@ -2116,18 +2064,6 @@
         #endif
     #else
         #define LV_USE_ARC        1
-    #endif
-#endif
-
-#ifndef LV_USE_ARCLABEL
-    #ifdef LV_KCONFIG_PRESENT
-        #ifdef CONFIG_LV_USE_ARCLABEL
-            #define LV_USE_ARCLABEL CONFIG_LV_USE_ARCLABEL
-        #else
-            #define LV_USE_ARCLABEL 0
-        #endif
-    #else
-        #define LV_USE_ARCLABEL  1
     #endif
 #endif
 
@@ -2611,7 +2547,7 @@
 /*==================
  * THEMES
  *==================*/
-/* Documentation for themes can be found here: https://docs.lvgl.io/master/details/common-widget-features/styles/styles.html#themes . */
+/* Documentation for themes can be found here: https://docs.lvgl.io/master/details/common-widget-features/styles/style.html#themes . */
 
 /** A simple, impressive and very complete theme */
 #ifndef LV_USE_THEME_DEFAULT
@@ -3125,14 +3061,7 @@
         #ifdef CONFIG_LV_TINY_TTF_CACHE_GLYPH_CNT
             #define LV_TINY_TTF_CACHE_GLYPH_CNT CONFIG_LV_TINY_TTF_CACHE_GLYPH_CNT
         #else
-            #define LV_TINY_TTF_CACHE_GLYPH_CNT 128
-        #endif
-    #endif
-    #ifndef LV_TINY_TTF_CACHE_KERNING_CNT
-        #ifdef CONFIG_LV_TINY_TTF_CACHE_KERNING_CNT
-            #define LV_TINY_TTF_CACHE_KERNING_CNT CONFIG_LV_TINY_TTF_CACHE_KERNING_CNT
-        #else
-            #define LV_TINY_TTF_CACHE_KERNING_CNT 256
+            #define LV_TINY_TTF_CACHE_GLYPH_CNT 256
         #endif
     #endif
 #endif
@@ -3143,15 +3072,6 @@
         #define LV_USE_RLOTTIE CONFIG_LV_USE_RLOTTIE
     #else
         #define LV_USE_RLOTTIE 0
-    #endif
-#endif
-
-/** Requires `LV_USE_3DTEXTURE = 1` */
-#ifndef LV_USE_GLTF
-    #ifdef CONFIG_LV_USE_GLTF
-        #define LV_USE_GLTF CONFIG_LV_USE_GLTF
-    #else
-        #define LV_USE_GLTF  0
     #endif
 #endif
 
@@ -3286,25 +3206,6 @@
             #define LV_SYSMON_GET_IDLE lv_os_get_idle_percent
         #endif
     #endif
-    /** 1: Enable usage of lv_os_get_proc_idle_percent.*/
-    #ifndef LV_SYSMON_PROC_IDLE_AVAILABLE
-        #ifdef CONFIG_LV_SYSMON_PROC_IDLE_AVAILABLE
-            #define LV_SYSMON_PROC_IDLE_AVAILABLE CONFIG_LV_SYSMON_PROC_IDLE_AVAILABLE
-        #else
-            #define LV_SYSMON_PROC_IDLE_AVAILABLE 0
-        #endif
-    #endif
-    #if LV_SYSMON_PROC_IDLE_AVAILABLE
-        /** Get the applications idle percentage.
-         * - Requires `LV_USE_OS == LV_OS_PTHREAD` */
-        #ifndef LV_SYSMON_GET_PROC_IDLE
-            #ifdef CONFIG_LV_SYSMON_GET_PROC_IDLE
-                #define LV_SYSMON_GET_PROC_IDLE CONFIG_LV_SYSMON_GET_PROC_IDLE
-            #else
-                #define LV_SYSMON_GET_PROC_IDLE lv_os_get_proc_idle_percent
-            #endif
-        #endif
-    #endif 
 
     /** 1: Show CPU usage and FPS count.
      *  - Requires `LV_USE_SYSMON = 1` */
@@ -3772,15 +3673,6 @@
     #endif
 #endif
 
-/** 1: Enable text translation support */
-#ifndef LV_USE_TRANSLATION
-    #ifdef CONFIG_LV_USE_TRANSLATION
-        #define LV_USE_TRANSLATION CONFIG_LV_USE_TRANSLATION
-    #else
-        #define LV_USE_TRANSLATION 0
-    #endif
-#endif
-
 /*1: Enable color filter style*/
 #ifndef LV_USE_COLOR_FILTER
     #ifdef CONFIG_LV_USE_COLOR_FILTER
@@ -3789,7 +3681,6 @@
         #define LV_USE_COLOR_FILTER     0
     #endif
 #endif
-
 /*==================
  * DEVICES
  *==================*/
@@ -4104,7 +3995,7 @@
         #endif
     #endif
 
-    /** Touchscreen cursor size in pixels(<=0: disable cursor) */
+    /*Touchscreen cursor size in pixels(<=0: disable cursor)*/
     #ifndef LV_NUTTX_TOUCHSCREEN_CURSOR_SIZE
         #ifdef CONFIG_LV_NUTTX_TOUCHSCREEN_CURSOR_SIZE
             #define LV_NUTTX_TOUCHSCREEN_CURSOR_SIZE CONFIG_LV_NUTTX_TOUCHSCREEN_CURSOR_SIZE
@@ -4112,47 +4003,6 @@
             #define LV_NUTTX_TOUCHSCREEN_CURSOR_SIZE    0
         #endif
     #endif
-
-    /** Driver for /dev/mouse */
-    #ifndef LV_USE_NUTTX_MOUSE
-        #ifdef CONFIG_LV_USE_NUTTX_MOUSE
-            #define LV_USE_NUTTX_MOUSE CONFIG_LV_USE_NUTTX_MOUSE
-        #else
-            #define LV_USE_NUTTX_MOUSE    0
-        #endif
-    #endif
-
-    /** Mouse movement step (pixels) */
-    #ifndef LV_USE_NUTTX_MOUSE_MOVE_STEP
-        #ifdef LV_KCONFIG_PRESENT
-            #ifdef CONFIG_LV_USE_NUTTX_MOUSE_MOVE_STEP
-                #define LV_USE_NUTTX_MOUSE_MOVE_STEP CONFIG_LV_USE_NUTTX_MOUSE_MOVE_STEP
-            #else
-                #define LV_USE_NUTTX_MOUSE_MOVE_STEP 0
-            #endif
-        #else
-            #define LV_USE_NUTTX_MOUSE_MOVE_STEP    1
-        #endif
-    #endif
-
-    /*NuttX trace file and its path*/
-    #ifndef LV_USE_NUTTX_TRACE_FILE
-        #ifdef CONFIG_LV_USE_NUTTX_TRACE_FILE
-            #define LV_USE_NUTTX_TRACE_FILE CONFIG_LV_USE_NUTTX_TRACE_FILE
-        #else
-            #define LV_USE_NUTTX_TRACE_FILE 0
-        #endif
-    #endif
-    #if LV_USE_NUTTX_TRACE_FILE
-        #ifndef LV_NUTTX_TRACE_FILE_PATH
-            #ifdef CONFIG_LV_NUTTX_TRACE_FILE_PATH
-                #define LV_NUTTX_TRACE_FILE_PATH CONFIG_LV_NUTTX_TRACE_FILE_PATH
-            #else
-                #define LV_NUTTX_TRACE_FILE_PATH "/data/lvgl-trace.log"
-            #endif
-        #endif
-    #endif
-
 #endif
 
 /** Driver for /dev/dri/card */
@@ -4170,11 +4020,11 @@
      * shared across sub-systems and libraries using the Linux DMA-BUF API.
      * The GBM library aims to provide a platform independent memory management system
      * it supports the major GPU vendors - This option requires linking with libgbm */
-    #ifndef LV_USE_LINUX_DRM_GBM_BUFFERS
-        #ifdef CONFIG_LV_USE_LINUX_DRM_GBM_BUFFERS
-            #define LV_USE_LINUX_DRM_GBM_BUFFERS CONFIG_LV_USE_LINUX_DRM_GBM_BUFFERS
+    #ifndef LV_LINUX_DRM_GBM_BUFFERS
+        #ifdef CONFIG_LV_LINUX_DRM_GBM_BUFFERS
+            #define LV_LINUX_DRM_GBM_BUFFERS CONFIG_LV_LINUX_DRM_GBM_BUFFERS
         #else
-            #define LV_USE_LINUX_DRM_GBM_BUFFERS 0
+            #define LV_LINUX_DRM_GBM_BUFFERS 0
         #endif
     #endif
 #endif
@@ -4322,15 +4172,6 @@
     #endif
 #endif
 
-/** Driver for NXP ELCDIF */
-#ifndef LV_USE_NXP_ELCDIF
-    #ifdef CONFIG_LV_USE_NXP_ELCDIF
-        #define LV_USE_NXP_ELCDIF CONFIG_LV_USE_NXP_ELCDIF
-    #else
-        #define LV_USE_NXP_ELCDIF   0
-    #endif
-#endif
-
 /** LVGL Windows backend */
 #ifndef LV_USE_WINDOWS
     #ifdef CONFIG_LV_USE_WINDOWS
@@ -4452,7 +4293,7 @@
             #define LV_USE_DEMO_WIDGETS 0
         #endif
     #endif
-
+    
     /** Demonstrate usage of encoder and keyboard. */
     #ifndef LV_USE_DEMO_KEYPAD_AND_ENCODER
         #ifdef CONFIG_LV_USE_DEMO_KEYPAD_AND_ENCODER
@@ -4461,7 +4302,7 @@
             #define LV_USE_DEMO_KEYPAD_AND_ENCODER 0
         #endif
     #endif
-
+    
     /** Benchmark your system */
     #ifndef LV_USE_DEMO_BENCHMARK
         #ifdef CONFIG_LV_USE_DEMO_BENCHMARK
@@ -4491,7 +4332,7 @@
             #define LV_USE_DEMO_RENDER 0
         #endif
     #endif
-
+    
     /** Stress test for LVGL */
     #ifndef LV_USE_DEMO_STRESS
         #ifdef CONFIG_LV_USE_DEMO_STRESS
@@ -4500,7 +4341,7 @@
             #define LV_USE_DEMO_STRESS 0
         #endif
     #endif
-
+    
     /** Music player demo */
     #ifndef LV_USE_DEMO_MUSIC
         #ifdef CONFIG_LV_USE_DEMO_MUSIC
@@ -4546,7 +4387,7 @@
             #endif
         #endif
     #endif
-
+    
     /** Vector graphic demo */
     #ifndef LV_USE_DEMO_VECTOR_GRAPHIC
         #ifdef CONFIG_LV_USE_DEMO_VECTOR_GRAPHIC
@@ -4555,20 +4396,11 @@
             #define LV_USE_DEMO_VECTOR_GRAPHIC  0
         #endif
     #endif
-
-    /** GLTF demo */
-    #ifndef LV_USE_DEMO_GLTF
-        #ifdef CONFIG_LV_USE_DEMO_GLTF
-            #define LV_USE_DEMO_GLTF CONFIG_LV_USE_DEMO_GLTF
-        #else
-            #define LV_USE_DEMO_GLTF            0
-        #endif
-    #endif
-
+    
     /*---------------------------
      * Demos from lvgl/lv_demos
       ---------------------------*/
-
+    
     /** Flex layout demo */
     #ifndef LV_USE_DEMO_FLEX_LAYOUT
         #ifdef CONFIG_LV_USE_DEMO_FLEX_LAYOUT
@@ -4577,7 +4409,7 @@
             #define LV_USE_DEMO_FLEX_LAYOUT     0
         #endif
     #endif
-
+    
     /** Smart-phone like multi-language demo */
     #ifndef LV_USE_DEMO_MULTILANG
         #ifdef CONFIG_LV_USE_DEMO_MULTILANG
@@ -4586,7 +4418,7 @@
             #define LV_USE_DEMO_MULTILANG       0
         #endif
     #endif
-
+    
     /** Widget transformation demo */
     #ifndef LV_USE_DEMO_TRANSFORM
         #ifdef CONFIG_LV_USE_DEMO_TRANSFORM
@@ -4595,7 +4427,7 @@
             #define LV_USE_DEMO_TRANSFORM       0
         #endif
     #endif
-
+    
     /** Demonstrate scroll settings */
     #ifndef LV_USE_DEMO_SCROLL
         #ifdef CONFIG_LV_USE_DEMO_SCROLL
@@ -4604,7 +4436,7 @@
             #define LV_USE_DEMO_SCROLL          0
         #endif
     #endif
-
+    
     /*E-bike demo with Lottie animations (if LV_USE_LOTTIE is enabled)*/
     #ifndef LV_USE_DEMO_EBIKE
         #ifdef CONFIG_LV_USE_DEMO_EBIKE
@@ -4622,7 +4454,7 @@
             #endif
         #endif
     #endif
-
+    
     /** High-resolution demo */
     #ifndef LV_USE_DEMO_HIGH_RES
         #ifdef CONFIG_LV_USE_DEMO_HIGH_RES
@@ -4631,7 +4463,7 @@
             #define LV_USE_DEMO_HIGH_RES        0
         #endif
     #endif
-
+    
     /* Smart watch demo */
     #ifndef LV_USE_DEMO_SMARTWATCH
         #ifdef CONFIG_LV_USE_DEMO_SMARTWATCH
@@ -4640,7 +4472,7 @@
             #define LV_USE_DEMO_SMARTWATCH      0
         #endif
     #endif
-#endif /* LV_BUILD_DEMOS */
+#endif /* LV_BUILD_DEMOS */ 
 
 
 

@@ -6,7 +6,6 @@
 
 
 .. toctree::
-    :class:    toctree-1-deep
     :maxdepth: 1
 
     arduino_esp_littlefs
@@ -17,7 +16,6 @@
     freetype
     fs
     gif
-    gltf
     lfs
     libjpeg_turbo
     libpng

@@ -74,7 +74,7 @@
 /* #define HAL_SPDIFRX_MODULE_ENABLED   */
 #define HAL_SPI_MODULE_ENABLED
 /* #define HAL_SWPMI_MODULE_ENABLED   */
-/* #define HAL_TIM_MODULE_ENABLED   */
+#define HAL_TIM_MODULE_ENABLED
 /* #define HAL_UART_MODULE_ENABLED   */
 /* #define HAL_USART_MODULE_ENABLED   */
 /* #define HAL_IRDA_MODULE_ENABLED   */
@@ -106,7 +106,7 @@
   *        (when HSE is used as system clock source, directly or through the PLL).
   */
 #if !defined  (HSE_VALUE)
-#define HSE_VALUE    (25000000UL) /*!< Value of the External oscillator in Hz : FPGA case fixed to 60MHZ */
+#define HSE_VALUE    (24000000UL) /*!< Value of the External oscillator in Hz : FPGA case fixed to 60MHZ */
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
@@ -165,7 +165,7 @@
   * @brief This is the HAL system configuration section
   */
 #define  VDD_VALUE                    (3300UL) /*!< Value of VDD in mv */
-#define  TICK_INT_PRIORITY            (15UL) /*!< tick interrupt priority */
+#define  TICK_INT_PRIORITY            (1UL) /*!< tick interrupt priority */
 #define  USE_RTOS                     0
 #define  USE_SD_TRANSCEIVER           0U               /*!< use uSD Transceiver */
 #define  USE_SPI_CRC	              0U               /*!< use CRC in SPI */
@@ -193,7 +193,7 @@
 #define  USE_HAL_GFXMMU_REGISTER_CALLBACKS  0U /* GFXMMU register callback disabled  */
 #define  USE_HAL_HRTIM_REGISTER_CALLBACKS   0U /* HRTIM register callback disabled   */
 #define  USE_HAL_I2C_REGISTER_CALLBACKS     0U /* I2C register callback disabled     */
-#define  USE_HAL_I2S_REGISTER_CALLBACKS     0U /* I2S register callback disabled     */
+#define  USE_HAL_I2S_REGISTER_CALLBACKS     1U /* I2S register callback enabled     */
 #define  USE_HAL_IRDA_REGISTER_CALLBACKS    0U /* IRDA register callback disabled    */
 #define  USE_HAL_JPEG_REGISTER_CALLBACKS    0U /* JPEG register callback disabled    */
 #define  USE_HAL_LPTIM_REGISTER_CALLBACKS   0U /* LPTIM register callback disabled   */
@@ -212,7 +212,7 @@
 #define  USE_HAL_SMARTCARD_REGISTER_CALLBACKS  0U /* SMARTCARD register callback disabled */
 #define  USE_HAL_SPDIFRX_REGISTER_CALLBACKS 0U /* SPDIFRX register callback disabled */
 #define  USE_HAL_SMBUS_REGISTER_CALLBACKS   0U /* SMBUS register callback disabled   */
-#define  USE_HAL_SPI_REGISTER_CALLBACKS     0U /* SPI register callback disabled     */
+#define  USE_HAL_SPI_REGISTER_CALLBACKS     1U /* SPI register callback enabled     */
 #define  USE_HAL_SWPMI_REGISTER_CALLBACKS   0U /* SWPMI register callback disabled   */
 #define  USE_HAL_TIM_REGISTER_CALLBACKS     0U /* TIM register callback disabled     */
 #define  USE_HAL_UART_REGISTER_CALLBACKS    0U /* UART register callback disabled    */

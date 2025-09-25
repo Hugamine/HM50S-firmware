@@ -1,20 +1,19 @@
 .. _integration_index:
 
-================
-Integrating LVGL
-================
+=======================
+Integration and Drivers
+=======================
 
 .. toctree::
     :maxdepth: 2
 
-    overview/index
-    pc/index
-    embedded_linux/index
-    rtos/index
-    frameworks/index
-    boards/index
-    chip_vendors/index
-    external_display_controllers/index
-    building/index
+    adding-lvgl-to-your-project/index
     bindings/index
-
+    building/index
+    chip/index
+    driver/index
+    renderers/index
+    framework/index
+    ide/index
+    os/index
+    boards/index

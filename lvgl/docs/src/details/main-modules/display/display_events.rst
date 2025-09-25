@@ -1,8 +1,7 @@
 .. _display_events:
 
-==============
-Display Events
-==============
+Events
+******
 
 :cpp:expr:`lv_display_add_event_cb(disp, event_cb, LV_EVENT_..., user_data)` adds
 an event handler to a display.

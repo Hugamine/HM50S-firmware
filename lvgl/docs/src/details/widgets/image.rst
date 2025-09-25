@@ -4,13 +4,15 @@
 Image (lv_image)
 ================
 
+.. |deg|    unicode:: U+000B0 .. DEGREE SIGN
+
 Overview
 ********
 
 .. |deg|    unicode:: U+000B0 .. DEGREE SIGN
 
 Images are Widgets that display images from flash (as arrays) or
-from files. Images can also display symbols (``LV_SYMBOL_...``).
+from files. Images can display symbols (``LV_SYMBOL_...``) as well.
 
 Using the :ref:`Image decoder interface <overview_image_decoder>`, custom image formats
 can be supported as well.
@@ -76,7 +78,7 @@ The internal (pixel array) and external images support 2 transparency
 handling methods:
 
 -  **Alpha byte**: An alpha channel is added to every pixel that contains
-   its opacity, typically a byte.  It is the 'A' in the various color formats
+   its opacity, typically a byte.  It is the 'A' in the the various color formats
    that contain an alpha channel, such as ARGB8888, ARGB8565, ARGB1555, etc.
 -  **Indexed transparent color**:  a specific index in a color palette serves to
    signal transparency for each pixel that uses it.
@@ -84,7 +86,8 @@ handling methods:
 Palette and Alpha index
 -----------------------
 
-Besides RGB888 and ARGB8888 color formats, the following formats are supported:
+Besides the *True color* (RGB) color format, the following formats are
+supported:
 
 - **Indexed**: Image has a color palette, and each pixel is an index into that palette.
 - **Alpha indexed**: The values stored at pixel positions are alpha (opacity) values.

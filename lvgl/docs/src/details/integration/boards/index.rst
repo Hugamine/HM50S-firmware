@@ -1,15 +1,10 @@
-.. _boards:
-
-=============
-Board Support
-=============
-
+======
+Boards
+======
 
 .. toctree::
-    :class:    toctree-1-deep
-    :maxdepth: 1
+    :maxdepth: 2
 
-
-    lvgl_supported
-    partner_supported
-    manufacturers/index
+    toradex
+    riverdi
+    viewe

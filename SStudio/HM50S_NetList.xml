@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- *
+ * This software is distributed in the hope that it will be useful,
+ * but is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * This software may only be used to program products purchased from
+ * Analog Devices for incorporation by you into audio products that
+ * are intended for resale to audio product end users. This software
+ * may not be distributed whole or in any part to third parties.
+ *
+ * Copyright © 2025 Analog Devices, Inc. All rights reserved.
+ */
+-->
+<!--NetList XML file-->
+<NetList>
+    <IC name=" ADAU1761 " type="DSPSigmaLP1">
+        <Schematic>
+            <Algorithm name="ICSigma200In1" friendlyname="Analog+Digital Inputs " cell="Input1 " location="{X=93, Y=109} " Growth="10 " GrowthB="0 " FS="96000">
+                <Link pin="O_C0_A0_P1_out" dir="out" link="Link6" />
+                <Link pin="O_C0_A0_P2_out" dir="out" link="Link8" />
+                <Link pin="O_C0_A0_P4_out" dir="out" link="Link10" />
+            </Algorithm>
+            <Algorithm name="HilbertAlg2" friendlyname="Hilbert " cell="H(t)2 " location="{X=273, Y=39} " Growth="0 " GrowthB="0">
+                <Link pin="I_C47_A0_P1_in" dir="in" link="Link6" />
+                <Link pin="O_C47_A0_P3_out" dir="out" link="Link7" />
+            </Algorithm>
+            <Algorithm name="HilbertAlg3" friendlyname="Hilbert " cell="H(t)3 " location="{X=309, Y=133} " Growth="0 " GrowthB="0">
+                <Link pin="I_C63_A0_P1_in" dir="in" link="Link8" />
+                <Link pin="O_C63_A0_P2_out" dir="out" link="Link9" />
+            </Algorithm>
+            <Algorithm name="HilbertAlg1" friendlyname="Hilbert " cell="H(t)1 " location="{X=311, Y=272} " Growth="0 " GrowthB="0">
+                <Link pin="I_C19_A0_P1_in" dir="in" link="Link10" />
+                <Link pin="O_C19_A0_P2_out" dir="out" link="Link12" />
+                <Link pin="O_C19_A0_P3_out" dir="out" link="Link11" />
+            </Algorithm>
+            <Algorithm name="SingleCtrlSplit1" friendlyname="Splitter Single " cell="S Splitter1 " location="{X=458, Y=-33} " Growth="2 " GrowthB="0">
+                <Link pin="I_C118_A0_P1_in" dir="in" link="Link7" />
+                <Link pin="O_C118_A0_P2_out" dir="out" link="Link4" />
+                <Link pin="O_C118_A0_P3_out" dir="out" link="Link0" />
+            </Algorithm>
+            <Algorithm name="SingleCtrlSplit2" friendlyname="Splitter Single " cell="S Splitter2 " location="{X=456, Y=118} " Growth="2 " GrowthB="0">
+                <Link pin="I_C122_A0_P1_in" dir="in" link="Link9" />
+                <Link pin="O_C122_A0_P2_out" dir="out" link="Link1" />
+                <Link pin="O_C122_A0_P3_out" dir="out" link="Link3" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out1" friendlyname="1761 output " cell="Output1 " location="{X=424, Y=303} " Growth="0 " GrowthB="0">
+                <Link pin="I_C11_A0_P1_in" dir="in" link="Link11" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out2" friendlyname="1761 output " cell="Output2 " location="{X=426, Y=244} " Growth="0 " GrowthB="0">
+                <Link pin="I_C13_A0_P1_in" dir="in" link="Link12" />
+            </Algorithm>
+            <Algorithm name="AdderAlg1" friendlyname="Signal Mix " cell="Add1 " location="{X=591, Y=86} " Growth="2 " GrowthB="0">
+                <Link pin="I_C51_A0_P2_in" dir="in" link="Link0" />
+                <Link pin="I_C51_A0_P3_in" dir="in" link="Link1" />
+                <Link pin="O_C51_A0_P1_out" dir="out" link="Link2" />
+            </Algorithm>
+            <Algorithm name="SubAlg1" friendlyname="Subtract " cell="Sub1 " location="{X=750, Y=127} " Growth="2 " GrowthB="0">
+                <Link pin="I_C58_A0_P2_in" dir="in" link="Link4" />
+                <Link pin="I_C58_A0_P3_in" dir="in" link="Link3" />
+                <Link pin="O_C58_A0_P1_out" dir="out" link="Link5" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out4" friendlyname="1761 output " cell="Output4 " location="{X=661, Y=93} " Growth="0 " GrowthB="0">
+                <Link pin="I_C23_A0_P1_in" dir="in" link="Link2" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out3" friendlyname="1761 output " cell="Output3 " location="{X=826, Y=101} " Growth="0 " GrowthB="0">
+                <Link pin="I_C17_A0_P1_in" dir="in" link="Link5" />
+            </Algorithm>
+        </Schematic>
+    </IC>
+</NetList>

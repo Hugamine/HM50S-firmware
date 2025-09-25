@@ -122,10 +122,6 @@ typedef struct _lv_global_t {
                                                             * can be managed by image cache. */
 
     lv_ll_t img_decoder_ll;
-#if LV_USE_OS != LV_OS_NONE
-    lv_mutex_t img_decoder_info_lock;
-    lv_mutex_t img_decoder_open_lock;
-#endif
 
     lv_cache_t * img_cache;
     lv_cache_t * img_header_cache;
@@ -232,11 +228,6 @@ typedef struct _lv_global_t {
     lv_test_state_t test_state;
 #endif
 
-#if LV_USE_TRANSLATION
-    lv_ll_t translation_packs_ll;
-    const char * translation_selected_lang;
-#endif
-
 #if LV_USE_NUTTX
     struct _lv_nuttx_ctx_t * nuttx_ctx;
 #endif
@@ -245,10 +236,6 @@ typedef struct _lv_global_t {
     lv_mutex_t lv_general_mutex;
 #if defined(__linux__)
     lv_proc_stat_t linux_last_proc_stat;
-#if defined LV_SYSMON_PROC_IDLE_AVAILABLE
-    uint64_t linux_last_self_proc_time_ticks;
-    lv_proc_stat_t linux_last_system_total_ticks_stat;
-#endif
 #endif
 #endif
 
@@ -261,15 +248,6 @@ typedef struct _lv_global_t {
 
 #if LV_USE_EVDEV
     lv_evdev_discovery_t * evdev_discovery;
-#endif
-
-#if LV_USE_XML
-    const char * xml_path_prefix;
-    uint32_t lv_event_xml_store_timeline;
-#endif
-
-#if LV_USE_DRAW_EVE
-    lv_draw_eve_unit_t * draw_eve_unit;
 #endif
 
     void * user_data;

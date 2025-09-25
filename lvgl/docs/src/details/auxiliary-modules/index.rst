@@ -18,6 +18,5 @@ Auxiliary Modules
     obj_property
     observer/index
     snapshot
-    sysmon
     test
-    translation
+    xml/index

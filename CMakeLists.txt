@@ -65,4 +65,49 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+    Ex
+    lvgl::lvgl
+    lvgl_porting
+    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/DSP/Lib/GCC/libarm_cortexM7lfsp_math.a
+)
+
+#----------------------------------------
+set(FPU_FLAGS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard)
+
+add_compile_options(${FPU_FLAGS})
+add_link_options(${FPU_FLAGS})
+
+#----------------------------------------
+
+# A user defined libraries for all external drivers in ./Ex
+file(GLOB_RECURSE LIB_SOURCE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adau1761.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adf4351.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/audio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/button_control.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/tlv320aic3204.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/ui.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/w25qxx.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/xpt2046.c
+)
+add_library(Ex ${LIB_SOURCE})
+target_include_directories(Ex PUBLIC 
+    Ex/Inc
+    SStudio/
+    Drivers/CMSIS/DSP/Include
+)
+target_link_libraries(Ex PRIVATE 
+    stm32cubemx
+    lvgl::lvgl
+)
+
+set(LV_BUILD_CONF_DIR ${PROJECT_SOURCE_DIR}/lvgl CACHE STRING "" FORCE)
+add_subdirectory(lvgl)
+
+add_library(lvgl_porting ${PROJECT_SOURCE_DIR}/lvgl/lv_port_indev.c)
+target_include_directories(lvgl_porting PUBLIC Ex/Inc)
+target_link_libraries(lvgl_porting PRIVATE
+        stm32cubemx
+        lvgl::lvgl
+        Ex
 )

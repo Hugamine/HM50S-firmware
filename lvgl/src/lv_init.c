@@ -39,7 +39,6 @@
 #include "misc/lv_fs.h"
 #include "osal/lv_os_private.h"
 #include "others/sysmon/lv_sysmon_private.h"
-#include "others/translation/lv_translation.h"
 #include "others/xml/lv_xml.h"
 
 #if LV_USE_SVG
@@ -75,9 +74,6 @@
 #if LV_USE_DRAW_OPENGLES
     #include "draw/opengles/lv_draw_opengles.h"
 #endif
-#if LV_USE_PPA
-    #include "draw/espressif/ppa/lv_draw_ppa.h"
-#endif
 #if LV_USE_WINDOWS
     #include "drivers/windows/lv_windows_context.h"
 #endif
@@ -86,9 +82,6 @@
 #endif
 #if LV_USE_EVDEV
     #include "drivers/evdev/lv_evdev_private.h"
-#endif
-#if LV_USE_DRAW_EVE
-    #include "draw/eve/lv_draw_eve.h"
 #endif
 
 /*********************
@@ -267,20 +260,12 @@ void lv_init(void)
     lv_draw_opengles_init();
 #endif
 
-#if LV_USE_PPA
-    lv_draw_ppa_init();
-#endif
-
 #if LV_USE_WINDOWS
     lv_windows_platform_init();
 #endif
 
 #if LV_USE_UEFI
     lv_uefi_platform_init();
-#endif
-
-#if LV_USE_DRAW_EVE
-    lv_draw_eve_init();
 #endif
 
     lv_obj_style_init();
@@ -401,10 +386,6 @@ void lv_init(void)
     lv_svg_decoder_init();
 #endif
 
-#if LV_USE_TRANSLATION
-    lv_translation_init();
-#endif
-
 #if LV_USE_XML
     lv_xml_init();
 #endif
@@ -516,14 +497,6 @@ void lv_deinit(void)
 
 #if LV_USE_OBJ_ID && LV_USE_OBJ_ID_BUILTIN
     lv_objid_builtin_destroy();
-#endif
-
-#if LV_USE_XML
-    lv_xml_deinit();
-#endif
-
-#if LV_USE_TRANSLATION
-    lv_translation_deinit();
 #endif
 
     lv_mem_deinit();

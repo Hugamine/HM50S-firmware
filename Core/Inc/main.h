@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void JumpToBootloader(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -63,20 +63,25 @@ void Error_Handler(void);
 #define SPK_EN_GPIO_Port GPIOC
 #define LO_CS_Pin GPIO_PIN_11
 #define LO_CS_GPIO_Port GPIOE
+#define LO_MUXOUT_Pin GPIO_PIN_15
+#define LO_MUXOUT_GPIO_Port GPIOE
 #define LCD_RST_Pin GPIO_PIN_14
 #define LCD_RST_GPIO_Port GPIOB
 #define PTT_Pin GPIO_PIN_10
 #define PTT_GPIO_Port GPIOD
+#define PTT_EXTI_IRQn EXTI15_10_IRQn
 #define LCD_CS_Pin GPIO_PIN_12
 #define LCD_CS_GPIO_Port GPIOD
-#define LED_G_Pin GPIO_PIN_13
-#define LED_G_GPIO_Port GPIOD
+#define LED_R_Pin GPIO_PIN_13
+#define LED_R_GPIO_Port GPIOD
 #define LCD_DC_Pin GPIO_PIN_14
 #define LCD_DC_GPIO_Port GPIOD
-#define LED_R_Pin GPIO_PIN_15
-#define LED_R_GPIO_Port GPIOD
+#define LED_G_Pin GPIO_PIN_15
+#define LED_G_GPIO_Port GPIOD
 #define LCD_BL_Pin GPIO_PIN_8
 #define LCD_BL_GPIO_Port GPIOA
+#define CHARGE_EN_Pin GPIO_PIN_15
+#define CHARGE_EN_GPIO_Port GPIOA
 #define PA_BIAS_EN_Pin GPIO_PIN_4
 #define PA_BIAS_EN_GPIO_Port GPIOD
 #define TR_SW_Pin GPIO_PIN_5

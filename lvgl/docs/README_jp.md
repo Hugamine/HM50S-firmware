@@ -61,7 +61,7 @@ LVGL LLC では、グラフィックデザイン、UI実装、コンサルティ
 
 **ウィジェット、スタイル、レイアウトなど**
   - 30以上の組み込み [ウィジェット](https://docs-lvgl-io.translate.goog/master/details/widgets/index.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja): ボタン、ラベル、スライダー、グラフ、キーボード、メーター、円弧、表など。
-  - ウィジェットの任意の部分を任意の状態にカスタマイズ可能な豊富なスタイルプロパティを備えた柔軟な [スタイルシステム](https://docs-lvgl-io.translate.goog/master/details/common-widget-features/styles/index.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja)。
+  - ウィジェットの任意の部分を任意の状態にカスタマイズ可能な豊富なスタイルプロパティを備えた柔軟な [スタイルシステム](https://docs-lvgl-io.translate.goog/master/details/common-widget-features/styles/style.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja)。
   - [Flexbox](https://docs-lvgl-io.translate.goog/master/details/common-widget-features/layouts/flex.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) および [グリッド](https://docs-lvgl-io.translate.goog/master/details/common-widget-features/layouts/grid.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) 風のレイアウトエンジンにより、ウィジェットのサイズと位置を自動的に設定。
   - テキスト表示(UTF-8対応)は、中国語、日本語、韓国語、タイ語、ヒンディー語、アラビア語、ペルシア語をサポート。
   - ワードラッピング、カーニング、テキストスクロール、サブピクセルレンダリング、ピンイン-IME中国語入力、テキスト中の絵文字に対応。
@@ -173,8 +173,7 @@ lv_obj_add_state(cb, LV_STATE_DISABLED);
 lv_obj_add_event(cb, event_handler, LV_EVENT_ALL, NULL);
 
 cb = lv_checkbox_create(lv_screen_active());
-lv_obj_add_state(cb, LV_STATE_CHECKED);
-lv_obj_add_state(cb, LV_STATE_DISABLED);
+lv_obj_add_state(cb, LV_STATE_CHECKED | LV_STATE_DISABLED);
 lv_checkbox_set_text(cb, "Melon\nand a new line");
 lv_obj_add_event(cb, event_handler, LV_EVENT_ALL, NULL);
 ```
@@ -376,8 +375,8 @@ LVGLを使い始める時は、以下の順に進める事をおすすめしま�
 **LVGLに触れてみましょう**
 
   1. LVGLの動きを [オンラインデモ](https://lvgl-io.translate.goog/demos?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) で確認しましょう。 (3分間)
-  2. ドキュメントの [Introduction](https://docs-lvgl-io.translate.goog/master/intro/introduction/index.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) を読みましょう。 (5分間)
-  3. LVGLの基本に慣れるため [Quick overview](https://docs-lvgl-io.translate.goog/master/intro/getting_started/learn_the_basics.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) を読みましょう。 (15分間)
+  2. ドキュメントの [Introduction](https://docs-lvgl-io.translate.goog/master/intro/index.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) を読みましょう。 (5分間)
+  3. LVGLの基本に慣れるため [Quick overview](https://docs-lvgl-io.translate.goog/master/intro/getting_started.html?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja) を読みましょう。 (15分間)
 
 **LVGLを使ってみましょう**
 

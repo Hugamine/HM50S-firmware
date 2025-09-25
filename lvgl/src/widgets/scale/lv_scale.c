@@ -14,7 +14,6 @@
 #include "../../core/lv_group.h"
 #include "../../misc/lv_assert.h"
 #include "../../misc/lv_math.h"
-#include "../../misc/lv_text_private.h"
 #include "../../draw/lv_draw_arc.h"
 
 /*********************
@@ -158,26 +157,6 @@ void lv_scale_set_range(lv_obj_t * obj, int32_t min, int32_t max)
     lv_scale_t * scale = (lv_scale_t *)obj;
 
     scale->range_min = min;
-    scale->range_max = max;
-
-    lv_obj_invalidate(obj);
-}
-
-void lv_scale_set_min_value(lv_obj_t * obj, int32_t min)
-{
-    LV_ASSERT_OBJ(obj, MY_CLASS);
-    lv_scale_t * scale = (lv_scale_t *)obj;
-    if(scale->range_min == min) return;
-    scale->range_min = min;
-
-    lv_obj_invalidate(obj);
-}
-
-void lv_scale_set_max_value(lv_obj_t * obj, int32_t max)
-{
-    LV_ASSERT_OBJ(obj, MY_CLASS);
-    lv_scale_t * scale = (lv_scale_t *)obj;
-    if(scale->range_max == max) return;
     scale->range_max = max;
 
     lv_obj_invalidate(obj);
@@ -379,27 +358,9 @@ void lv_scale_set_section_range(lv_obj_t * scale, lv_scale_section_t * section, 
     LV_ASSERT_OBJ(scale, MY_CLASS);
     LV_ASSERT_NULL(section);
 
-    lv_scale_set_section_min_value(scale, section, min);
-    lv_scale_set_section_max_value(scale, section, max);
-}
-
-void lv_scale_set_section_min_value(lv_obj_t * scale, lv_scale_section_t * section, int32_t min)
-{
-    LV_ASSERT_OBJ(scale, MY_CLASS);
-    LV_ASSERT_NULL(section);
-
-    if(section->range_min == min) return;
     section->range_min = min;
-    lv_obj_invalidate(scale);
-}
-
-void lv_scale_set_section_max_value(lv_obj_t * scale, lv_scale_section_t * section, int32_t max)
-{
-    LV_ASSERT_OBJ(scale, MY_CLASS);
-    LV_ASSERT_NULL(section);
-
-    if(section->range_max == max) return;
     section->range_max = max;
+
     lv_obj_invalidate(scale);
 }
 
@@ -631,7 +592,6 @@ static void scale_draw_indicator(lv_obj_t * obj, lv_event_t * event)
     label_dsc.base.layer = layer;
     /* Formatting the labels with the configured style for LV_PART_INDICATOR */
     lv_obj_init_draw_label_dsc(obj, LV_PART_INDICATOR, &label_dsc);
-
 
     /* Major tick style */
     lv_draw_line_dsc_t major_tick_dsc;
@@ -1274,22 +1234,10 @@ static void scale_get_label_coords(lv_obj_t * obj, lv_draw_label_dsc_t * label_d
 {
     lv_scale_t * scale = (lv_scale_t *)obj;
 
-    lv_text_attributes_t attributes = {0};
-    attributes.letter_space = label_dsc->letter_space;
-    attributes.line_space = label_dsc->line_space;
-    attributes.max_width = LV_COORD_MAX;
-    attributes.text_flags = LV_TEXT_FLAG_NONE;
-
     /* Reserve appropriate size for the tick label */
     lv_point_t label_size;
-
-    if(label_dsc->text != NULL) {
-        lv_text_get_size(&label_size, label_dsc->text, label_dsc->font, &attributes);
-    }
-    else {
-        label_size.x = 0;
-        label_size.y = 0;
-    }
+    lv_text_get_size(&label_size, label_dsc->text,
+                     label_dsc->font, label_dsc->letter_space, label_dsc->line_space, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
 
     /* Set the label draw area at some distance of the major tick */
     if((LV_SCALE_MODE_HORIZONTAL_BOTTOM == scale->mode) || (LV_SCALE_MODE_HORIZONTAL_TOP == scale->mode)) {

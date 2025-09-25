@@ -33,7 +33,11 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-
+#define TX_EN_GPIO(state) HAL_GPIO_WritePin(TX_EN_GPIO_Port, TX_EN_Pin, state)
+#define RX_EN_GPIO(state) HAL_GPIO_WritePin(RX_EN_GPIO_Port, RX_EN_Pin, state)
+#define TR_SW_GPIO(state) HAL_GPIO_WritePin(TR_SW_GPIO_Port, TR_SW_Pin, state)
+#define PA_BIAS_EN_GPIO(state) HAL_GPIO_WritePin(PA_BIAS_EN_GPIO_Port, PA_BIAS_EN_Pin, state)
+#define SPK_EN_GPIO(state) HAL_GPIO_WritePin(SPK_EN_GPIO_Port, SPK_EN_Pin, state)
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);
