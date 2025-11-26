@@ -29,6 +29,10 @@ void tx_i2s_dma_start(void);
 void rx_i2s_dma_start(void);
 void i2s_dma_stop(void);
 
+void usb_start(void);
+void usb_test(uint8_t *pbuf, uint32_t size);
+
+
 void audio_init(void);
 void audio_start_dma(void);
 

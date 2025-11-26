@@ -1,7 +1,7 @@
 /*
  * File:           defines.h
  *
- * Created:        Thursday, September 25, 2025 9:23:17 AM
+ * Created:        Saturday, November 15, 2025 6:17:02 PM
  * Description:    HM50S IC default download data definitions.
  *
  * This software is distributed in the hope that it will be useful,
@@ -19,7 +19,7 @@
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
 
-#define BufferSize_ADAU1761     	6396
+#define BufferSize_ADAU1761     	6591
 #define NumTransactions_ADAU1761	39
 
 

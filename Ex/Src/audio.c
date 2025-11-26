@@ -8,6 +8,8 @@
 #include "adf4351.h"
 #include "stm32h7xx_hal.h"
 #include "tlv320aic3204.h"
+
+// #include "usbd_audio_spkr_if.h"
 // #include "hilbert.h"
 
 // float32_t audio_sine[AUDIO_BUF_LEN];
@@ -17,8 +19,9 @@ __attribute__((section(".ram_d2_section"))) int32_t i2s1_rx_buf[AUDIO_BUF_LEN];
 __attribute__((section(".ram_d2_section"))) int32_t i2s1_tx_buf[AUDIO_BUF_LEN];
 __attribute__((section(".ram_d2_section"))) int32_t i2s2_rx_buf[AUDIO_BUF_LEN];
 __attribute__((section(".ram_d2_section"))) int32_t i2s2_tx_buf[AUDIO_BUF_LEN];
-
 __attribute__((section(".ram_d2_section"))) int32_t i2s_dummy_buf[AUDIO_BUF_LEN] = {0};
+
+__attribute__((section(".ram_d2_section"))) int32_t usb_i2s_buf[AUDIO_BUF_LEN];
 
 // static volatile int32_t *inBufptr;
 // static volatile int32_t *outBufptr;
@@ -49,13 +52,60 @@ void tx_i2s_dma_start(void){
 
 void rx_i2s_dma_start(void){
     HAL_I2SEx_TransmitReceive_DMA(&hi2s1, (uint16_t *)i2s_dummy_buf, (uint16_t *)i2s1_rx_buf, AUDIO_BUF_LEN);
-    // HAL_I2SEx_TransmitReceive_DMA(&hi2s2, (uint16_t *)i2s2_tx_buf, (uint16_t *)i2s2_rx_buf, AUDIO_BUF_LEN);
+    HAL_I2SEx_TransmitReceive_DMA(&hi2s2, (uint16_t *)i2s1_rx_buf, (uint16_t *)i2s2_rx_buf, AUDIO_BUF_LEN);
 }
 
 void i2s_dma_stop(void){
     HAL_I2S_DMAStop(&hi2s1);
     HAL_I2S_DMAStop(&hi2s2);
 }
+
+#define USB_FRAME_BYTES   4      // 16-bit stereo = 4 bytes
+#define UPSAMPLE_FACTOR   2      // 48k → 96k
+
+// Convert USB 16-bit stereo (48kHz) → I2S 32-bit (24-bit left-aligned, 96kHz)
+void usb16_to_i2s32_96k(const uint8_t *usb_buf, uint32_t usb_len, int32_t *i2s_buf)
+{
+    uint32_t out_idx = 0;
+
+    for (uint32_t i = 0; i < usb_len; i += USB_FRAME_BYTES) {
+        // Little-endian 16-bit PCM samples from USB
+        int16_t L16 = (int16_t)(usb_buf[i] | (usb_buf[i+1] << 8));
+        int16_t R16 = (int16_t)(usb_buf[i+2] | (usb_buf[i+3] << 8));
+
+        // Scale 16-bit → 24-bit (linear mapping)
+        int32_t L24 = (int32_t)L16 * 256;   // -32768..32767 → -8388608..8388352
+        int32_t R24 = (int32_t)R16 * 256;
+
+        // Align to 32-bit I²S frame (left aligned)
+        int32_t L32 = L24 << 8;  // 24-bit value in MSBs of 32-bit word
+        int32_t R32 = R24 << 8;
+
+        // Duplicate for 2× upsampling (48k → 96k)
+        for (int u = 0; u < UPSAMPLE_FACTOR; u++) {
+            i2s_buf[out_idx++] = L32;
+            i2s_buf[out_idx++] = R32;
+        }
+    }
+}
+
+// Example USB audio buffer (48k stereo, 16-bit)
+uint8_t usb_buf[192];   // e.g. 48 stereo frames = 1 ms at 48kHz
+
+// I2S buffer: 96k stereo, 32-bit per channel → 2× samples, 2× words
+int32_t i2s_buf[96 * 2];  // 96 stereo frames (192 samples = 384 bytes)
+
+void usb_start(void){
+    HAL_I2SEx_TransmitReceive_DMA(&hi2s2, (uint16_t*)i2s_buf, (uint16_t *)i2s2_rx_buf, 192);
+    // HAL_I2SEx_TransmitReceive_DMA(&hi2s2, (uint16_t*)i2s1_rx_buf, (uint16_t *)i2s2_rx_buf, 8192);
+}
+
+void usb_test(uint8_t *pbuf, uint32_t size){
+    memcpy(usb_buf, pbuf, 192);
+    // Convert
+    usb16_to_i2s32_96k(usb_buf, sizeof(usb_buf), i2s_buf);
+}
+
 
 arm_rfft_fast_instance_f32 rfft_instance;
 
@@ -113,6 +163,9 @@ void baseband_fft(const volatile int32_t *input, float32_t *fft_output_usb, floa
 }
 
 
+
+
+
 // void processData(volatile int32_t *input, volatile int32_t *output)
 // {
 //     static float32_t input_right[AUDIO_BUF_LEN/4];
@@ -163,20 +216,20 @@ void baseband_fft(const volatile int32_t *input, float32_t *fft_output_usb, floa
 //     }
 // }
 
-void i2s1_Tx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
+// void i2s1_Tx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
-void i2s1_Rx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
-    baseband_inputBufptr = &i2s1_rx_buf[0];
-    baseband_fft(baseband_inputBufptr, fft_output_usb, fft_output_lsb);
-}
-void i2s1_Tx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
+// }
+// void i2s1_Rx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
+//     baseband_inputBufptr = &i2s1_rx_buf[0];
+//     baseband_fft(baseband_inputBufptr, fft_output_usb, fft_output_lsb);
+// }
+// void i2s1_Tx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
-void i2s1_Rx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
-    baseband_inputBufptr = &i2s1_rx_buf[AUDIO_BUF_LEN/2];
-    baseband_fft(baseband_inputBufptr, fft_output_usb, fft_output_lsb);
-}
+// }
+// void i2s1_Rx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
+//     baseband_inputBufptr = &i2s1_rx_buf[AUDIO_BUF_LEN/2];
+//     baseband_fft(baseband_inputBufptr, fft_output_usb, fft_output_lsb);
+// }
 void i2s1_TxRx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
     if(tx_en == false){
         baseband_inputBufptr = &i2s1_rx_buf[0];
@@ -193,39 +246,41 @@ void i2s1_TxRx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
 
     }
 }
-void i2s2_Tx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
+// void i2s2_Tx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
-void i2s2_Rx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
+// }
+// void i2s2_Rx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
-void i2s2_Tx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
+// }
+// void i2s2_Tx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
-void i2s2_Rx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
+// }
+// void i2s2_Rx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
 
-}
+// }
 void i2s2_TxRx_HalfCplt_Callback(I2S_HandleTypeDef *hi2s) {
-    
+    // HalfTransfer_CallBack_FS();
 }
 void i2s2_TxRx_Cplt_Callback(I2S_HandleTypeDef *hi2s) {
     // inBufptr = &i2s3_rx_buf[AUDIO_BUF_LEN/2];
     // outBufptr = &i2s2_tx_buf[AUDIO_BUF_LEN/2];
 
     // processData(inBufptr, outBufptr);
+
+    // TransferComplete_CallBack_FS();
 }
 
 void audio_init(void) {
-    HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_HALF_COMPLETE_CB_ID, i2s1_Tx_HalfCplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_RX_HALF_COMPLETE_CB_ID, i2s1_Rx_HalfCplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_COMPLETE_CB_ID, i2s1_Tx_Cplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_HALF_COMPLETE_CB_ID, i2s1_Tx_HalfCplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_RX_HALF_COMPLETE_CB_ID, i2s1_Rx_HalfCplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_COMPLETE_CB_ID, i2s1_Tx_Cplt_Callback);
     HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_RX_HALF_COMPLETE_CB_ID, i2s1_TxRx_HalfCplt_Callback);
     HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_TX_RX_COMPLETE_CB_ID, i2s1_TxRx_Cplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_RX_COMPLETE_CB_ID, i2s1_Rx_Cplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_HALF_COMPLETE_CB_ID, i2s2_Tx_HalfCplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_RX_HALF_COMPLETE_CB_ID, i2s2_Rx_HalfCplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_COMPLETE_CB_ID, i2s2_Tx_Cplt_Callback);
-    HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_RX_COMPLETE_CB_ID, i2s2_Rx_Cplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s1, HAL_I2S_RX_COMPLETE_CB_ID, i2s1_Rx_Cplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_HALF_COMPLETE_CB_ID, i2s2_Tx_HalfCplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_RX_HALF_COMPLETE_CB_ID, i2s2_Rx_HalfCplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_COMPLETE_CB_ID, i2s2_Tx_Cplt_Callback);
+    // HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_RX_COMPLETE_CB_ID, i2s2_Rx_Cplt_Callback);
     HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_RX_HALF_COMPLETE_CB_ID, i2s2_TxRx_HalfCplt_Callback);
     HAL_I2S_RegisterCallback(&hi2s2, HAL_I2S_TX_RX_COMPLETE_CB_ID, i2s2_TxRx_Cplt_Callback);
 

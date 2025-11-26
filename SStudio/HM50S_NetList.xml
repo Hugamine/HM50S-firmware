@@ -20,7 +20,7 @@
             <Algorithm name="ICSigma200In1" friendlyname="Analog+Digital Inputs " cell="Input1 " location="{X=93, Y=109} " Growth="10 " GrowthB="0 " FS="96000">
                 <Link pin="O_C0_A0_P1_out" dir="out" link="Link6" />
                 <Link pin="O_C0_A0_P2_out" dir="out" link="Link8" />
-                <Link pin="O_C0_A0_P4_out" dir="out" link="Link10" />
+                <Link pin="O_C0_A0_P4_out" dir="out" link="Link13" />
             </Algorithm>
             <Algorithm name="HilbertAlg2" friendlyname="Hilbert " cell="H(t)2 " location="{X=273, Y=39} " Growth="0 " GrowthB="0">
                 <Link pin="I_C47_A0_P1_in" dir="in" link="Link6" />
@@ -30,10 +30,9 @@
                 <Link pin="I_C63_A0_P1_in" dir="in" link="Link8" />
                 <Link pin="O_C63_A0_P2_out" dir="out" link="Link9" />
             </Algorithm>
-            <Algorithm name="HilbertAlg1" friendlyname="Hilbert " cell="H(t)1 " location="{X=311, Y=272} " Growth="0 " GrowthB="0">
-                <Link pin="I_C19_A0_P1_in" dir="in" link="Link10" />
-                <Link pin="O_C19_A0_P2_out" dir="out" link="Link12" />
-                <Link pin="O_C19_A0_P3_out" dir="out" link="Link11" />
+            <Algorithm name="NthOrderDouble1" friendlyname="1 Channel - Double Precision " cell="NFilter1 " location="{X=283, Y=230} " Growth="0 " GrowthB="0">
+                <Link pin="I_C85_A0_P1_in" dir="in" link="Link13" />
+                <Link pin="O_C85_A0_P2_out" dir="out" link="Link12" />
             </Algorithm>
             <Algorithm name="SingleCtrlSplit1" friendlyname="Splitter Single " cell="S Splitter1 " location="{X=458, Y=-33} " Growth="2 " GrowthB="0">
                 <Link pin="I_C118_A0_P1_in" dir="in" link="Link7" />
@@ -45,11 +44,10 @@
                 <Link pin="O_C122_A0_P2_out" dir="out" link="Link1" />
                 <Link pin="O_C122_A0_P3_out" dir="out" link="Link3" />
             </Algorithm>
-            <Algorithm name="ICSigmaLP1Out1" friendlyname="1761 output " cell="Output1 " location="{X=424, Y=303} " Growth="0 " GrowthB="0">
-                <Link pin="I_C11_A0_P1_in" dir="in" link="Link11" />
-            </Algorithm>
-            <Algorithm name="ICSigmaLP1Out2" friendlyname="1761 output " cell="Output2 " location="{X=426, Y=244} " Growth="0 " GrowthB="0">
-                <Link pin="I_C13_A0_P1_in" dir="in" link="Link12" />
+            <Algorithm name="HilbertAlg1" friendlyname="Hilbert " cell="H(t)1 " location="{X=622, Y=303} " Growth="0 " GrowthB="0">
+                <Link pin="I_C19_A0_P1_in" dir="in" link="Link12" />
+                <Link pin="O_C19_A0_P2_out" dir="out" link="Link11" />
+                <Link pin="O_C19_A0_P3_out" dir="out" link="Link10" />
             </Algorithm>
             <Algorithm name="AdderAlg1" friendlyname="Signal Mix " cell="Add1 " location="{X=591, Y=86} " Growth="2 " GrowthB="0">
                 <Link pin="I_C51_A0_P2_in" dir="in" link="Link0" />
@@ -60,6 +58,12 @@
                 <Link pin="I_C58_A0_P2_in" dir="in" link="Link4" />
                 <Link pin="I_C58_A0_P3_in" dir="in" link="Link3" />
                 <Link pin="O_C58_A0_P1_out" dir="out" link="Link5" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out1" friendlyname="1761 output " cell="Output1 " location="{X=819, Y=332} " Growth="0 " GrowthB="0">
+                <Link pin="I_C11_A0_P1_in" dir="in" link="Link10" />
+            </Algorithm>
+            <Algorithm name="ICSigmaLP1Out2" friendlyname="1761 output " cell="Output2 " location="{X=812, Y=274} " Growth="0 " GrowthB="0">
+                <Link pin="I_C13_A0_P1_in" dir="in" link="Link11" />
             </Algorithm>
             <Algorithm name="ICSigmaLP1Out4" friendlyname="1761 output " cell="Output4 " location="{X=661, Y=93} " Growth="0 " GrowthB="0">
                 <Link pin="I_C23_A0_P1_in" dir="in" link="Link2" />

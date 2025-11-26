@@ -171,11 +171,13 @@ void adf4351_update_Reg5(ADF4351_Config *c) {
     c->r[5] = build_r5(c);
 }
 
+#define FREQ_OFFSET 0
+
 void adf4351_update_frequency(Frequency_disp freq) {
     uint32_t Frequency, remainder;
     uint16_t quotient;
 
-    Frequency = freq.M * 1000000 + freq.k * 1000 + freq.n;
+    Frequency = freq.M * 1000000 + freq.k * 1000 + freq.n + FREQ_OFFSET;
     quotient = Frequency * 32 * 2 / 200000;
     remainder = Frequency * 32 * 2 % 200000;
     lo.int_val = quotient;

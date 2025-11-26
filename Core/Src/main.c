@@ -44,6 +44,7 @@
 #include "ui.h"
 #include "audio.h"
 #include "w25qxx.h"
+#include "ina219.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,10 +69,14 @@
 /* USER CODE BEGIN PV */
 lv_display_t *lcd_disp;
 volatile int lcd_bus_busy = 0;
+
+extern volatile uint8_t usb_dtr_state;
+extern volatile uint8_t usb_rts_state;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 void LVGL_Task();
@@ -116,6 +121,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -132,18 +140,22 @@ int main(void)
   MX_TIM4_Init();
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
+  if(HAL_GPIO_ReadPin(BTN_R_GPIO_Port, BTN_R_Pin) == GPIO_PIN_RESET){
+    JumpToBootloader();
+  }
+  adau1761_init();
   MX_USB_DEVICE_Init();
   audio_init();
-  adau1761_init();
   adf4351_init();
   codec_init();
+  ina219_init_all();
   rfft_init();
   HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_SET);
-  SCB->CCR &= ~(1 << 3);//solves a big problem for lvgl
+  SCB->CCR &= ~(1 << 3);//solves a big problem for lvgl, hardfault otherwise
 
   RX_EN_GPIO(1);
   rx_i2s_dma_start();
-
+// W25Q_EraseChip();
   LVGL_Task();
   /* USER CODE END 2 */
 
@@ -151,16 +163,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_GPIO_TogglePin(LED_R_GPIO_Port, LED_R_Pin);
+    // HAL_GPIO_TogglePin(LED_R_GPIO_Port, LED_R_Pin);
     // HAL_Delay(1010);
     lv_timer_handler();
 
-    // Check touch detect pin
     // if (HAL_GPIO_ReadPin(TP_IRQ_GPIO_Port, TP_IRQ_Pin) == GPIO_PIN_RESET) {
     //     calibration_touch_detected();   // process one calibration touch
     //     while (HAL_GPIO_ReadPin(TP_IRQ_GPIO_Port, TP_IRQ_Pin) == GPIO_PIN_RESET);
     //     HAL_Delay(20);
-    //  } // debounce
+    //  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -221,6 +233,33 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI3|RCC_PERIPHCLK_SPI2
+                              |RCC_PERIPHCLK_SPI1;
+  PeriphClkInitStruct.PLL2.PLL2M = 6;
+  PeriphClkInitStruct.PLL2.PLL2N = 120;
+  PeriphClkInitStruct.PLL2.PLL2P = 4;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
@@ -355,7 +394,7 @@ void LVGL_Task()
   // }
 }
 
-/*----------------------------DFU---------------------------*/
+/*---------------------------------------------DFU------------------------------------------*/
 #ifndef BOOTLOADER_ADDR
  #define BOOTLOADER_ADDR  ((uint32_t)0x1FF09800U)
 #endif

@@ -1,10 +1,14 @@
 #include "ui.h"
+#include "main.h"
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx_hal_gpio.h"
 #include "xpt2046.h"
 #include "math.h"
 #include <ctype.h>
+#include <src/lv_api_map_v8.h>
 #include <src/misc/lv_color.h>
 #include <src/misc/lv_palette.h>
+#include <src/misc/lv_timer_private.h>
 #include <src/widgets/chart/lv_chart_private.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +16,9 @@
 #include "w25qxx.h"
 #include "adf4351.h"
 #include "audio.h"
-
+#include "ina219.h"
+#include "gpio.h"
+/*----------------Calibration----------------*/
 static lv_obj_t * calib_scr;
 static lv_obj_t * info_label;
 int pos_temp[4][2];//坐标缓存值
@@ -25,6 +31,7 @@ static lv_obj_t * info_label;
 static lv_obj_t * dot_obj;
 static int point_index = 0;
 bool calibration_running;
+extern lv_obj_t * main_scr; 
 
 // target positions (pixels)
 static const lv_point_t target_points[4] = {
@@ -49,6 +56,23 @@ static void draw_point(void)
     lv_obj_set_style_radius(dot_obj, LV_RADIUS_CIRCLE, 0);
     // lv_obj_align(dot_obj, LV_ALIGN_TOP_LEFT, target_points[point_index].x, target_points[point_index].y);
     lv_obj_set_pos(dot_obj, target_points[point_index].x-6, target_points[point_index].y-6);
+}
+
+static void restart_cb(lv_timer_t * t) {
+    point_index = 0;
+    draw_point();
+    lv_timer_del(t);
+}
+
+static void restart_calibration(void)
+{
+    lv_obj_clean(calib_scr);
+
+    lv_obj_t * label = lv_label_create(calib_scr);
+    lv_label_set_text(label, "Restart Calibration");
+    lv_obj_center(label);
+
+    lv_timer_create(restart_cb, 800, NULL);
 }
 
 // ---- called by your GPIO pen IRQ handler or polling loop ----
@@ -87,6 +111,7 @@ void calibration_touch_detected(void)
    	 			// TP_Drow_Touch_Point(20,20,RED);								//画点1
  				// TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][0],pos_temp[2][1],pos_temp[3][0],pos_temp[3][1],fac*100);//显示数据   
  				// continue;
+                restart_calibration();
                 return;
 			}
             tem1=abs(pos_temp[0][0]-pos_temp[2][0]);//x1-x3
@@ -108,6 +133,7 @@ void calibration_touch_detected(void)
    	 			// TP_Drow_Touch_Point(20,20,RED);								//画点1
  				// TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][0],pos_temp[2][1],pos_temp[3][0],pos_temp[3][1],fac*100);//显示数据   
 				// continue;
+                restart_calibration();
                 return;
 			}//正确了
 						   
@@ -130,6 +156,7 @@ void calibration_touch_detected(void)
    	 			// TP_Drow_Touch_Point(20,20,RED);								//画点1
  				// TP_Adj_Info_Show(pos_temp[0][0],pos_temp[0][1],pos_temp[1][0],pos_temp[1][1],pos_temp[2][0],pos_temp[2][1],pos_temp[3][0],pos_temp[3][1],fac*100);//显示数据   
 				// continue;
+                restart_calibration();
                 return;
 			}//正确了
 			//计算结果
@@ -163,10 +190,23 @@ void calibration_touch_detected(void)
                 TP_Save_Adjdata();
             }
             calibration_running = false;
-
-            lv_scr_load(lv_screen_active());  // go back to main GUI
+            lv_scr_load(main_scr);  // go back to main GUI
         }
     
+}
+
+static void calib_poll_cb(lv_timer_t * t)
+{
+    if(!calibration_running) {
+        lv_timer_del(t);
+        return;
+    }
+
+    if (HAL_GPIO_ReadPin(TP_IRQ_GPIO_Port, TP_IRQ_Pin) == GPIO_PIN_RESET) {
+        calibration_touch_detected();
+        while (HAL_GPIO_ReadPin(TP_IRQ_GPIO_Port, TP_IRQ_Pin) == GPIO_PIN_RESET);
+        HAL_Delay(20);
+    }
 }
 
 // ---- start calibration ----
@@ -179,12 +219,18 @@ void start_touch_calibration(void)
     lv_scr_load(calib_scr);
 
     draw_point();
+    lv_timer_create(calib_poll_cb, 10, NULL); // check every 10ms
+}
+
+void calib_event_handler(lv_event_t * e){
+    start_touch_calibration();
 }
 
 /*-------------------------------------------------------------------------------------------------*/
 
 typedef struct {
     lv_obj_t *spectrum_chart;
+    lv_obj_t *spectrum_canvas;
     lv_chart_series_t *spectrum_series;
     lv_chart_series_t *peak_series;
 
@@ -208,6 +254,7 @@ static lv_obj_t *digit_kb;
 static lv_obj_t *kb_container;
 static lv_obj_t *input_display = NULL;
 
+lv_obj_t * main_scr;
 lv_obj_t *cont_main;
 
 __attribute__((section(".ram_d2_section"))) float usb_db[FFT_LEN];
@@ -274,6 +321,16 @@ static void create_spectrum(lv_obj_t *parent) {
     // lv_label_set_text(mark_label, "100MHz");
     // lv_obj_set_pos(mark_label, mark_pos - 30, MAX_DB - 10);
     // lv_obj_set_style_text_color(mark_label, lv_color_hex(0x808080), 0);
+}
+
+
+static lv_color_t spectrum_buf[SPECTRUM_WIDTH * SPECTRUM_HEIGHT];
+
+static void create_spectrum_new(lv_obj_t *parent) {
+    sdr_ui.spectrum_canvas = lv_canvas_create(parent);
+    lv_canvas_set_buffer(sdr_ui.spectrum_canvas, spectrum_buf,
+                     SPECTRUM_WIDTH, SPECTRUM_HEIGHT, LV_COLOR_FORMAT_RGB565);
+    lv_obj_align(sdr_ui.spectrum_canvas, LV_ALIGN_CENTER, 0, 5);
 }
 
 // 初始化瀑布图
@@ -493,21 +550,17 @@ void create_frequency_ui(lv_obj_t *parent) {
 
 static void dfu_event_handler(lv_event_t * e)
 {
-    lv_obj_t *dfu_overlay = lv_obj_create(lv_scr_act());
+    lv_obj_t *dfu_overlay = lv_obj_create(main_scr);
     lv_obj_set_size(dfu_overlay, LV_PCT(100), LV_PCT(100));
     lv_obj_set_style_bg_color(dfu_overlay, lv_color_black(), 0);
     lv_obj_set_style_bg_opa(dfu_overlay, LV_OPA_COVER, 0);
 
     lv_obj_t *dfu_label = lv_label_create(dfu_overlay);
-    lv_label_set_text(dfu_label, "DFU in 3");
+    lv_label_set_text(dfu_label, "DFU in 2");
     lv_obj_set_style_text_font(dfu_label, &lv_font_montserrat_32, 0);
     lv_obj_set_style_text_color(dfu_label, lv_color_white(), 0);
     lv_obj_center(dfu_label);
 
-    lv_refr_now(NULL); 
-    HAL_Delay(1000);
-
-    lv_label_set_text(dfu_label, "DFU in 2");
     lv_refr_now(NULL); 
     HAL_Delay(1000);
 
@@ -528,9 +581,235 @@ void dfu_button_temp(lv_obj_t *parent) {
     lv_obj_center(label);
 }
 
+/*--------------------------------------------------------Menu--------------------------------------------------------*/
+/* Forward declarations */
+static void dfu_event_cb(lv_event_t *e);
+static void calib_event_cb(lv_event_t *e);
+static void back_event_cb(lv_event_t *e);
+static void charge_switch_event_cb(lv_event_t *e);
+
+static lv_obj_t *menu;
+static lv_obj_t *subpage_setting;
+static lv_obj_t *charge_switch;
+static lv_obj_t *speaker_switch;
+
+/* ---- Event callbacks ---- */
+
+static void dfu_event_cb(lv_event_t *e)
+{
+    LV_UNUSED(e);
+    lv_obj_t *dfu_overlay = lv_obj_create(main_scr);
+    lv_obj_set_size(dfu_overlay, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_style_bg_color(dfu_overlay, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(dfu_overlay, LV_OPA_COVER, 0);
+
+    lv_obj_t *dfu_label = lv_label_create(dfu_overlay);
+    lv_label_set_text(dfu_label, "DFU in 2");
+    lv_obj_set_style_text_font(dfu_label, &lv_font_montserrat_32, 0);
+    lv_obj_set_style_text_color(dfu_label, lv_color_white(), 0);
+    lv_obj_center(dfu_label);
+
+    // lv_refr_now(NULL); 
+    // HAL_Delay(1000);
+
+    // lv_label_set_text(dfu_label, "DFU in 1");
+    // lv_refr_now(NULL); 
+    // HAL_Delay(1000);
+
+    JumpToBootloader();
+}
+
+static void calib_event_cb(lv_event_t *e)
+{
+    LV_UNUSED(e);
+    start_touch_calibration();
+}
+
+static void charge_switch_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        bool state = lv_obj_has_state(charge_switch, LV_STATE_CHECKED);
+        if(state) {
+            // Enable charging
+            CHARGE_EN_GPIO(1);
+            LV_LOG_USER("Charging ENABLED");
+        } else {
+            // Disable charging
+            CHARGE_EN_GPIO(0);
+            LV_LOG_USER("Charging DISABLED");
+        }
+    }
+}
+
+static void speaker_switch_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        bool state = lv_obj_has_state(speaker_switch, LV_STATE_CHECKED);
+        if(state) {
+            SPK_EN_GPIO(0);
+        } else {
+            SPK_EN_GPIO(1);
+        }
+    }
+}
+
+
+static void back_event_handler(lv_event_t * e)
+{
+    lv_obj_t * obj = lv_event_get_target_obj(e);
+    lv_obj_t * menu = (lv_obj_t *)lv_event_get_user_data(e);
+
+    if(lv_menu_back_button_is_root(menu, obj)) {
+        lv_obj_del(menu);
+    }
+}
+
+static lv_obj_t * add_menu_button(lv_obj_t * parent_section, const char *txt, lv_event_cb_t cb)
+{
+    lv_obj_t * cont = lv_menu_cont_create(parent_section);
+
+    /* create a real button inside the menu container */
+    lv_obj_t * btn = lv_btn_create(cont);
+    lv_obj_set_size(btn, LV_PCT(100), 40);
+    lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, cb, LV_EVENT_SHORT_CLICKED, NULL);
+
+    /* button label */
+    lv_obj_t * label = lv_label_create(btn);
+    lv_label_set_text(label, txt);
+    lv_obj_center(label);
+
+    /* make the container itself not clickable so only the button reacts */
+    lv_obj_clear_flag(cont, LV_OBJ_FLAG_CLICKABLE);
+
+    return cont; /* return the container (useful for lv_menu_set_load_page_event) */
+}
+
+/* ---- Menu creation ---- */
+void create_menu(lv_obj_t *parent)
+{
+    /* Create menu */
+    menu = lv_menu_create(parent);
+    lv_obj_set_size(menu, LV_PCT(80), LV_PCT(80));
+    lv_menu_set_mode_root_back_button(menu, LV_MENU_ROOT_BACK_BUTTON_ENABLED);
+    lv_obj_add_event_cb(menu, back_event_handler, LV_EVENT_CLICKED, menu);
+    lv_obj_center(menu);
+
+    /* Root page */
+    lv_obj_t *root_page = lv_menu_page_create(menu, "Main Menu");
+    lv_obj_t * sec1 = lv_menu_section_create(root_page);
+
+    /* DFU button */
+    lv_obj_t *cont_dfu = lv_menu_cont_create(root_page);
+    lv_obj_t *label_dfu = lv_label_create(cont_dfu);
+    lv_label_set_text(label_dfu, "DFU Mode");
+
+    /* Calibration button */
+    lv_obj_t *cont_calib = lv_menu_cont_create(root_page);
+    lv_obj_t *label_calib = lv_label_create(cont_calib);
+    lv_label_set_text(label_calib, "Touch Calibration");
+
+    add_menu_button(sec1, "DFU", dfu_event_cb);
+    add_menu_button(sec1, "Calibration", calib_event_cb);
+
+    /* Charge Settings -> goes to subpage */
+    lv_obj_t *cont_charge = lv_menu_cont_create(root_page);
+    lv_label_set_text(lv_label_create(cont_charge), "Charge Settings");
+
+    /* Create Charge subpage */
+    subpage_setting = lv_menu_page_create(menu, "Settings");
+    lv_menu_set_load_page_event(menu, cont_charge, subpage_setting);
+
+    /* Charge enable switch */
+    lv_obj_t *cont_switch = lv_menu_cont_create(subpage_setting);
+    lv_label_set_text(lv_label_create(cont_switch), "Enable Charge");
+
+    charge_switch = lv_switch_create(cont_switch);
+    lv_obj_add_event_cb(charge_switch, charge_switch_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_align(charge_switch, LV_ALIGN_RIGHT_MID, -10, 0);
+
+        /* Charge enable switch */
+    cont_switch = lv_menu_cont_create(subpage_setting);
+    lv_label_set_text(lv_label_create(cont_switch), "Enable Speaker");
+
+    speaker_switch = lv_switch_create(cont_switch);
+    lv_obj_add_event_cb(speaker_switch, speaker_switch_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_align(speaker_switch, LV_ALIGN_RIGHT_MID, -10, 0);
+
+    lv_menu_set_page(menu, root_page);
+}
+
+static void menu_btn_event_cb(lv_event_t *e)
+{
+    if(lv_event_get_code(e) == LV_EVENT_CLICKED) {
+        create_menu(cont_main);   // open the menu on current screen
+    }
+}
+
+void create_menu_button(lv_obj_t *parent)
+{
+    /* Create the menu button */
+    lv_obj_t *btn = lv_btn_create(parent);
+    lv_obj_align(btn, LV_ALIGN_TOP_RIGHT, -10, 10);
+
+    lv_obj_t *label = lv_label_create(btn);
+    lv_label_set_text(label, "Menu");
+    lv_obj_center(label);
+
+    /* Attach callback */
+    lv_obj_add_event_cb(btn, menu_btn_event_cb, LV_EVENT_CLICKED, NULL);
+}
+
+/*--------------------------------------------------power display------------------------------------------*/
+extern INA219_Config ina219_bat;
+extern INA219_Config ina219_ext;
+
+static lv_obj_t * voltage_label;
+static lv_obj_t * current_label;
+
+volatile uint8_t pwr_src = 0;
+
+static void ina219_update_cb(lv_timer_t * t)
+{
+    float volts, amps;
+
+    pwr_src = HAL_GPIO_ReadPin(PWR_SRC_GPIO_Port, PWR_SRC_Pin);
+
+    if(pwr_src){
+        volts = ina219_get_bus_volt(&ina219_ext);
+        amps = ina219_get_current(&ina219_ext);
+    } else{
+        volts = ina219_get_bus_volt(&ina219_bat);
+        amps = ina219_get_current(&ina219_bat);
+    }
+    /* Update labels */
+    lv_label_set_text_fmt(voltage_label, "%.2f V", volts);
+    lv_label_set_text_fmt(current_label, "%.3f A", amps);
+}
+
+/* Call once at UI init */
+void create_ina219_panel(lv_obj_t * parent)
+{
+    voltage_label = lv_label_create(parent);
+    lv_label_set_text(voltage_label, "-- V");
+    lv_obj_align(voltage_label, LV_ALIGN_TOP_RIGHT, 0, 10);
+
+    current_label = lv_label_create(parent);
+    lv_label_set_text(current_label, "-- A");
+    lv_obj_align(current_label, LV_ALIGN_TOP_RIGHT, 0, 40);
+
+    /* Update every 500 ms */
+    lv_timer_create(ina219_update_cb, 500, NULL);
+}
+
+/*-------------------------------------------Main------------------------------------------------*/
 void ui_create_main(void){
+    main_scr = lv_obj_create(NULL);   // main screen
+    lv_scr_load(main_scr);
     // 创建主容器
-    cont_main = lv_obj_create(lv_scr_act());
+    cont_main = lv_obj_create(main_scr);
     lv_obj_set_size(cont_main, LV_HOR_RES, LV_VER_RES);
     // lv_obj_set_flex_flow(cont_main, LV_FLEX_FLOW_COLUMN);
     // lv_obj_set_style_pad_all(cont_main, 10, 0);
@@ -541,11 +820,14 @@ void ui_create_main(void){
     lv_obj_clear_flag(cont_main, LV_OBJ_FLAG_SCROLLABLE);
 
     // 创建频谱图
-    create_spectrum(cont_main);
+    // create_spectrum(cont_main);
+    create_spectrum_new(cont_main);
     // 创建瀑布图
     create_waterfall(cont_main);
     create_frequency_ui(cont_main);
-    dfu_button_temp(cont_main);
+    // dfu_button_temp(cont_main);
+    create_menu_button(cont_main);
+    create_ina219_panel(cont_main);
 }
 
 // 生成模拟频谱数据
@@ -757,6 +1039,54 @@ void process_spectrum_display(
     }
 }
 
+static void canvas_draw_line(lv_obj_t *canvas,
+                             int x1, int y1,
+                             int x2, int y2,
+                             lv_color_t color)
+{
+    int dx = abs(x2 - x1);
+    int sx = x1 < x2 ? 1 : -1;
+    int dy = -abs(y2 - y1);
+    int sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy;
+
+    while (1) {
+        lv_canvas_set_px(canvas, x1, y1, color, LV_OPA_COVER);
+
+        if (x1 == x2 && y1 == y2) break;
+
+        int e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x1 += sx; }
+        if (e2 <= dx) { err += dx; y1 += sy; }
+    }
+}
+
+
+
+void spectrum_render_canvas(lv_obj_t *canvas,
+                            int32_t *display_buf,
+                            uint16_t n_points,
+                            int min_db,
+                            int max_db,
+                            int width,
+                            int height)
+{
+    // clear to black
+    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+
+    for (uint16_t i = 0; i < n_points - 1; i++) {
+        int x1 = (i * width) / n_points;
+        int x2 = ((i + 1) * width) / n_points;
+
+        int y1 = height - ((display_buf[i]   - min_db) * height) / (max_db - min_db);
+        int y2 = height - ((display_buf[i+1] - min_db) * height) / (max_db - min_db);
+
+        canvas_draw_line(canvas, x1, y1, x2, y2, lv_color_white());
+    }
+}
+
+
+
 
 void update_waterfall(const float *usb_db, const float *lsb_db)
 {
@@ -793,11 +1123,14 @@ void update_waterfall(const float *usb_db, const float *lsb_db)
     lv_obj_invalidate(sdr_ui.waterfall_canvas);
 }
 
+static int32_t display_buf[SPECTRUM_POINTS];
 void ui_update(void){
     process_spectrum_display(fft_output_usb, fft_output_lsb, usb_db,
-        lsb_db, sdr_ui.spectrum_series->y_points, "max", 50);
+        lsb_db, display_buf, "max", 50);
 
-    lv_chart_refresh(sdr_ui.spectrum_chart);
+    spectrum_render_canvas(sdr_ui.spectrum_canvas, display_buf, SPECTRUM_POINTS, MIN_DB, MAX_DB, SPECTRUM_WIDTH, SPECTRUM_HEIGHT);
+
+    // lv_chart_refresh(sdr_ui.spectrum_chart);
     update_waterfall(usb_db, lsb_db);
 }
 

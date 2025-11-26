@@ -69,26 +69,64 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     lvgl::lvgl
     lvgl_porting
     ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/DSP/Lib/GCC/libarm_cortexM7lfsp_math.a
+    # usbd
 )
+#--------------------Float--------------------
 
-#----------------------------------------
-set(FPU_FLAGS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard)
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -u _printf_float)
 
-add_compile_options(${FPU_FLAGS})
-add_link_options(${FPU_FLAGS})
+#--------------------FPU--------------------
+# set(FPU_FLAGS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard)
 
-#----------------------------------------
+# add_compile_options(${FPU_FLAGS})
+# add_link_options(${FPU_FLAGS})
+#------------------------USBD-----------------------
+
+# set(usbd_src
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/CDC_ACM/Src/usbd_cdc_acm.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/AUDIO_SPKR/Src/usbd_audio_spkr.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_audio_spkr_if.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_ctlreq.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_ioreq.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usb_device.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_desc.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Target/usbd_conf.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/COMPOSITE/Src/usbd_composite.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/AUDIO_MIC/Src/usbd_audio_mic.c
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_audio_mic_if.c
+# )
+# set(usbd_inc
+#     Middlewares/Third_Party/AL94_USB_Composite
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/AUDIO_MIC/Inc
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/AUDIO_COMMON
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/COMPOSITE/Inc
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Inc
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Target
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/AUDIO_SPKR/Inc
+#     Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/CDC_ACM/Inc
+# )
+
+# add_library(usbd OBJECT)
+# target_sources(usbd PRIVATE ${usbd_src})
+# target_link_libraries(usbd PUBLIC stm32cubemx Ex)
+# target_include_directories(stm32cubemx INTERFACE ${usbd_inc})
+
+#-------------------Ex---------------------
 
 # A user defined libraries for all external drivers in ./Ex
 file(GLOB_RECURSE LIB_SOURCE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adau1761.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adf4351.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/audio.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/button_control.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/tlv320aic3204.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/ui.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/w25qxx.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/xpt2046.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adau1761.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/adf4351.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/audio.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/button_control.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/tlv320aic3204.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/ui.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/w25qxx.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/xpt2046.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ex/Src/*.c
 )
 add_library(Ex ${LIB_SOURCE})
 target_include_directories(Ex PUBLIC 
@@ -111,3 +149,5 @@ target_link_libraries(lvgl_porting PRIVATE
         lvgl::lvgl
         Ex
 )
+
+target_link_libraries(Composite PUBLIC Ex)

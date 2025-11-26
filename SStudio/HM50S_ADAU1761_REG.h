@@ -1,7 +1,7 @@
 /*
  * File:           C:\ST\Project\HM50S-firmware\SStudio\HM50S_ADAU1761_REG.h
  *
- * Created:        Thursday, September 25, 2025 9:23:17 AM
+ * Created:        Saturday, November 15, 2025 6:17:02 PM
  * Description:    HM50S:ADAU1761 control register definitions.
  *
  * This software is distributed in the hope that it will be useful,
@@ -248,7 +248,7 @@
 /* CRC Ideal_1  - Registers (ADAU1761) */
 #define REG_CRC_IDEAL_1_ADAU1761_ADDR             0x40C0
 #define REG_CRC_IDEAL_1_ADAU1761_BYTE             1
-#define REG_CRC_IDEAL_1_ADAU1761_VALUE            0x7F
+#define REG_CRC_IDEAL_1_ADAU1761_VALUE            0x7D
 
 /* CRC Ideal_2  - Registers (ADAU1761) */
 #define REG_CRC_IDEAL_2_ADAU1761_ADDR             0x40C1
@@ -258,12 +258,12 @@
 /* CRC Ideal_3  - Registers (ADAU1761) */
 #define REG_CRC_IDEAL_3_ADAU1761_ADDR             0x40C2
 #define REG_CRC_IDEAL_3_ADAU1761_BYTE             1
-#define REG_CRC_IDEAL_3_ADAU1761_VALUE            0x4
+#define REG_CRC_IDEAL_3_ADAU1761_VALUE            0x47
 
 /* CRC Ideal_4  - Registers (ADAU1761) */
 #define REG_CRC_IDEAL_4_ADAU1761_ADDR             0x40C3
 #define REG_CRC_IDEAL_4_ADAU1761_BYTE             1
-#define REG_CRC_IDEAL_4_ADAU1761_VALUE            0x7B
+#define REG_CRC_IDEAL_4_ADAU1761_VALUE            0x7F
 
 /* CRC Enable  - Registers (ADAU1761) */
 #define REG_CRC_ENABLE_ADAU1761_ADDR              0x40C4
@@ -875,7 +875,7 @@
 #define R44_DEJITTER_ADAU1761_SHIFT               0
 
 /* CRC Ideal_1 (ADAU1761) */
-#define R45_CRC_IDEAL_1_ADAU1761                  0x7F   /* 01111111b	[7:0] */
+#define R45_CRC_IDEAL_1_ADAU1761                  0x7D   /* 01111101b	[7:0] */
 #define R45_CRC_IDEAL_1_ADAU1761_MASK             0xFF
 #define R45_CRC_IDEAL_1_ADAU1761_SHIFT            0
 
@@ -885,12 +885,12 @@
 #define R46_CRC_IDEAL_2_ADAU1761_SHIFT            0
 
 /* CRC Ideal_3 (ADAU1761) */
-#define R47_CRC_IDEAL_3_ADAU1761                  0x04   /* 00000100b	[7:0] */
+#define R47_CRC_IDEAL_3_ADAU1761                  0x47   /* 01000111b	[7:0] */
 #define R47_CRC_IDEAL_3_ADAU1761_MASK             0xFF
 #define R47_CRC_IDEAL_3_ADAU1761_SHIFT            0
 
 /* CRC Ideal_4 (ADAU1761) */
-#define R48_CRC_IDEAL_4_ADAU1761                  0x7B   /* 01111011b	[7:0] */
+#define R48_CRC_IDEAL_4_ADAU1761                  0x7F   /* 01111111b	[7:0] */
 #define R48_CRC_IDEAL_4_ADAU1761_MASK             0xFF
 #define R48_CRC_IDEAL_4_ADAU1761_SHIFT            0
 

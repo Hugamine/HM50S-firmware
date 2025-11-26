@@ -3,12 +3,16 @@
 //
 
 #include "xpt2046.h"
+#include "main.h"
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx_hal_gpio.h"
 #include "tim.h"
 #include "spi.h"
 #include "stdlib.h"
 #include "w25qxx.h"
 #include <stdint.h>
+
+#define CALIB_ADDR  0x000000  // pick a dedicated 4KB sector
 
 SPI_HandleTypeDef* spiPort;
 TouchScreen_CoordinatesRaw ts_CoordinatesRaw;
@@ -314,7 +318,7 @@ uint8_t TP_Get_Adjdata(void)
 	W25Q_ReadFullID(ID);
 	if((ID[0]<<8|ID[1])==W25Q256)
 	{
-		if(W25Q_ReadRaw(tempbufa,14,0x0000) != W25Q_OK){
+		if(W25Q_ReadRaw(tempbufa,14,CALIB_ADDR) != W25Q_OK){
 			return 1;
 		}
 		tempfac=tempbufa[13];
@@ -384,8 +388,10 @@ void TP_Save_Adjdata(void)
 			tempbuf[12]=0x00;
 	temp=0X0B;//标记校准过了
 			tempbuf[13]=temp;
-			if(W25Q_ProgramRaw(tempbuf,14,0x0000) != W25Q_OK){
-				HAL_Delay(1000);
+			if(W25Q_EraseSector(CALIB_ADDR) == W25Q_OK){
+			    if(W25Q_ProgramRaw(tempbuf,14,CALIB_ADDR) != W25Q_OK){
+				    HAL_Delay(1000);
+			    }
 			}
 
 }

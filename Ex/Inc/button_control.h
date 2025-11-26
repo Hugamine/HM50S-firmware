@@ -4,6 +4,7 @@
 #include "main.h"
 
 uint8_t read_PTT_state(void);
-// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+void tx(void);
+void rx(void);
 
 #endif //BUTTON_CONTROL_H

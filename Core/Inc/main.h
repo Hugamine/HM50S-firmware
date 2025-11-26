@@ -57,10 +57,16 @@ void JumpToBootloader(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define PWR_SRC_Pin GPIO_PIN_1
+#define PWR_SRC_GPIO_Port GPIOA
 #define TX_EN_Pin GPIO_PIN_3
 #define TX_EN_GPIO_Port GPIOA
 #define SPK_EN_Pin GPIO_PIN_5
 #define SPK_EN_GPIO_Port GPIOC
+#define BTN_U_Pin GPIO_PIN_0
+#define BTN_U_GPIO_Port GPIOB
+#define BTN_L_Pin GPIO_PIN_1
+#define BTN_L_GPIO_Port GPIOB
 #define LO_CS_Pin GPIO_PIN_11
 #define LO_CS_GPIO_Port GPIOE
 #define LO_MUXOUT_Pin GPIO_PIN_15
@@ -70,6 +76,8 @@ void JumpToBootloader(void);
 #define PTT_Pin GPIO_PIN_10
 #define PTT_GPIO_Port GPIOD
 #define PTT_EXTI_IRQn EXTI15_10_IRQn
+#define BTN_R_Pin GPIO_PIN_11
+#define BTN_R_GPIO_Port GPIOD
 #define LCD_CS_Pin GPIO_PIN_12
 #define LCD_CS_GPIO_Port GPIOD
 #define LED_R_Pin GPIO_PIN_13
@@ -78,10 +86,20 @@ void JumpToBootloader(void);
 #define LCD_DC_GPIO_Port GPIOD
 #define LED_G_Pin GPIO_PIN_15
 #define LED_G_GPIO_Port GPIOD
+#define BTN_D_Pin GPIO_PIN_9
+#define BTN_D_GPIO_Port GPIOC
 #define LCD_BL_Pin GPIO_PIN_8
 #define LCD_BL_GPIO_Port GPIOA
 #define CHARGE_EN_Pin GPIO_PIN_15
 #define CHARGE_EN_GPIO_Port GPIOA
+#define LINE_IO_SW_R_Pin GPIO_PIN_0
+#define LINE_IO_SW_R_GPIO_Port GPIOD
+#define LINE_IO_SW_L_Pin GPIO_PIN_1
+#define LINE_IO_SW_L_GPIO_Port GPIOD
+#define LINE_AD_SW_L_Pin GPIO_PIN_2
+#define LINE_AD_SW_L_GPIO_Port GPIOD
+#define LINE_AD_SW_R_Pin GPIO_PIN_3
+#define LINE_AD_SW_R_GPIO_Port GPIOD
 #define PA_BIAS_EN_Pin GPIO_PIN_4
 #define PA_BIAS_EN_GPIO_Port GPIOD
 #define TR_SW_Pin GPIO_PIN_5

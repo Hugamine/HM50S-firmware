@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/ST/Project/HM50S-firmware/build/Debug/cmake_install.cmake",
+		"C:/ST/Project/HM50S-firmware/build/Debug/cmake/stm32cubemx/cmake_install.cmake",
+		"C:/ST/Project/HM50S-firmware/build/Debug/lvgl/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

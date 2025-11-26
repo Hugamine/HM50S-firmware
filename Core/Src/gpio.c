@@ -24,6 +24,8 @@
 /* USER CODE BEGIN 0 */
 #include "button_control.h"
 #include "audio.h"
+#include "main.h"
+#include "stm32h7xx_hal_gpio.h"
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
@@ -55,7 +57,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, TX_EN_Pin|LCD_BL_Pin|CHARGE_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPK_EN_GPIO_Port, SPK_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SPK_EN_GPIO_Port, SPK_EN_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LO_CS_GPIO_Port, LO_CS_Pin, GPIO_PIN_SET);
@@ -67,7 +69,14 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOD, LCD_CS_Pin|PA_BIAS_EN_Pin|TR_SW_Pin|TP_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LED_R_Pin|LCD_DC_Pin|LED_G_Pin|RX_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, LED_R_Pin|LCD_DC_Pin|LED_G_Pin|LINE_IO_SW_R_Pin
+                          |LINE_IO_SW_L_Pin|LINE_AD_SW_L_Pin|LINE_AD_SW_R_Pin|RX_EN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PWR_SRC_Pin */
+  GPIO_InitStruct.Pin = PWR_SRC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(PWR_SRC_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : TX_EN_Pin LCD_BL_Pin */
   GPIO_InitStruct.Pin = TX_EN_Pin|LCD_BL_Pin;
@@ -82,6 +91,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SPK_EN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : BTN_U_Pin BTN_L_Pin */
+  GPIO_InitStruct.Pin = BTN_U_Pin|BTN_L_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LO_CS_Pin */
   GPIO_InitStruct.Pin = LO_CS_Pin;
@@ -109,6 +124,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(PTT_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : BTN_R_Pin */
+  GPIO_InitStruct.Pin = BTN_R_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(BTN_R_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : LCD_CS_Pin LCD_DC_Pin TP_CS_Pin */
   GPIO_InitStruct.Pin = LCD_CS_Pin|LCD_DC_Pin|TP_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -116,14 +137,22 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_R_Pin LED_G_Pin PA_BIAS_EN_Pin TR_SW_Pin
+  /*Configure GPIO pins : LED_R_Pin LED_G_Pin LINE_IO_SW_R_Pin LINE_IO_SW_L_Pin
+                           LINE_AD_SW_L_Pin LINE_AD_SW_R_Pin PA_BIAS_EN_Pin TR_SW_Pin
                            RX_EN_Pin */
-  GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|PA_BIAS_EN_Pin|TR_SW_Pin
+  GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|LINE_IO_SW_R_Pin|LINE_IO_SW_L_Pin
+                          |LINE_AD_SW_L_Pin|LINE_AD_SW_R_Pin|PA_BIAS_EN_Pin|TR_SW_Pin
                           |RX_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BTN_D_Pin */
+  GPIO_InitStruct.Pin = BTN_D_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(BTN_D_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CHARGE_EN_Pin */
   GPIO_InitStruct.Pin = CHARGE_EN_Pin;
@@ -145,9 +174,12 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+// extern uint8_t pwr_src;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     if(GPIO_Pin == PTT_Pin){
         if(read_PTT_state() == GPIO_PIN_RESET){
+          LED_R_GPIO(1);
             TR_SW_GPIO(0);
             TX_EN_GPIO(1);
             RX_EN_GPIO(0);
@@ -161,6 +193,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         }
 
         else if(read_PTT_state() == GPIO_PIN_SET){
+          LED_R_GPIO(0);
             PA_BIAS_EN_GPIO(1);
             TX_EN_GPIO(0);
             RX_EN_GPIO(1);
@@ -173,6 +206,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
             tx_en = false;
         }
     }
-    // __HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
+    // if(GPIO_Pin == PWR_SRC_Pin){
+    //   if(HAL_GPIO_ReadPin(PWR_SRC_GPIO_Port, PWR_SRC_Pin) == GPIO_PIN_SET){
+    //     pwr_src = 1;
+    //   }
+    //   if(HAL_GPIO_ReadPin(PWR_SRC_GPIO_Port, PWR_SRC_Pin) == GPIO_PIN_RESET){
+    //     pwr_src = 0;
+    //   }
+    // }
 }
 /* USER CODE END 2 */

@@ -55,10 +55,10 @@
 #define _USBD_USE_HID_CUSTOM      false
 
 /*---------- _USBD_USE_UAC_MIC  -----------*/
-#define _USBD_USE_UAC_MIC      true
+#define _USBD_USE_UAC_MIC      false
 
 /*---------- _USBD_USE_UAC_SPKR  -----------*/
-#define _USBD_USE_UAC_SPKR      true
+#define _USBD_USE_UAC_SPKR      false
 
 /*---------- _USBD_USE_UVC  -----------*/
 #define _USBD_USE_UVC      false

@@ -4,6 +4,8 @@
 
 #include "tlv320aic3204.h"
 #include "i2c.h"
+#include "gpio.h"
+#include "stdbool.h"
 
 void codec_reg_w(uint8_t addr, uint8_t data)
 {
@@ -30,6 +32,25 @@ void codec_soft_reset()
     codec_reg_w(0x01, 0x01);
 }
 
+void codec_sw_to_line(bool state){
+    codec_reg_page(1);
+    if(state){
+        codec_reg_w(0x37, 0x40); //R MICPGA POS IN1R WITH 10K
+        codec_reg_w(0x3C, 0); //R MICPGA GAIN ENABLED, +XDB GAIN, 1=0.5db
+
+        codec_reg_w(0x0D, 0x08); //HPR TO DAC
+        codec_reg_w(0x11, 28); //HPR UNMUTE, X GAIN
+
+        codec_reg_w(0x09, 0x15); //+HPR POWERED UP
+    }
+    else{
+        codec_reg_w(0x37, 0x10); //R MICPGA POS IN2R WITH 10K
+        codec_reg_w(0x3C, 60); //R MICPGA GAIN ENABLED, +XDB GAIN, 1=0.5db
+
+        codec_reg_w(0x0D, 0x00); //HPR NOT TO DAC
+    }
+}
+
 void codec_init()
 {
     HAL_Delay(10);
@@ -51,7 +72,7 @@ void codec_init()
     //	codec_reg_w(0x0A, 0x00); //CM CTRL
     codec_reg_w(0x0F, 0x08); //DAC TO LOR
     codec_reg_w(0x09, 0x05); //LOR AND MAR POWERED UP
-    codec_reg_w(0x13, 0x00); //LOR UNMUTE, +3DB LOR DRIVER GAIN
+    codec_reg_w(0x13, 0x10); //LOR UNMUTE, +3DB LOR DRIVER GAIN
     codec_reg_page(0);
     codec_reg_w(0x3F, 0xD6); //R DAC POWERED UP
     codec_reg_w(0x40, 0x00); //R DAC UNMUTE
@@ -65,6 +86,8 @@ void codec_init()
     codec_reg_w(0x37, 0x10); //R MICPGA POS IN2R WITH 10K
     codec_reg_w(0x39, 0x01); //R MICPGA NEG
     	// codec_reg_w(0x0F, 0x02); //MAR TO LOR
-    codec_reg_w(0x3C, 60); //R MICPGA GAIN ENABLED, +XDB GAIN
+    codec_reg_w(0x3C, 60); //R MICPGA GAIN ENABLED, +XDB GAIN, 1=0.5db
+
+    codec_sw_to_line(true);
 }
 

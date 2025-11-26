@@ -9,7 +9,7 @@ extern "C" {
 #include "main.h"
 
 #define SPECTRUM_WIDTH       320
-#define SPECTRUM_HEIGHT      100
+#define SPECTRUM_HEIGHT      30
 #define SPECTRUM_POINTS      320
 #define WATERFALL_WIDTH      SPECTRUM_WIDTH
 #define WATERFALL_HEIGHT     50
